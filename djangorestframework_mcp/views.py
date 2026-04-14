@@ -283,6 +283,12 @@ class MCPView(View):
         method_kwargs = params.get("kwargs", {})
         body_data = params.get("body", {})
 
+        # For list actions, body contains filter params that need to go into query params
+        query_params = {}
+        if action == "list" and body_data:
+            query_params = body_data
+            body_data = {}
+
         # Create a new HttpRequest that represents the equivalent API call
         body_bytes = json.dumps(body_data).encode("utf-8") if body_data else b"{}"
         request = HttpRequest()
@@ -294,6 +300,17 @@ class MCPView(View):
             request.user = original_request.user
         if hasattr(original_request, "auth"):
             request.auth = original_request.auth
+
+        # For list actions, inject filter params as query parameters so DRF's
+        # DjangoFilterBackend, SearchFilter, and OrderingFilter pick them up.
+        if query_params:
+            from django.http import QueryDict
+
+            qd = QueryDict(mutable=True)
+            for key, value in query_params.items():
+                if value is not None:
+                    qd[key] = str(value)
+            request.GET = qd
 
         # Replace the body with the body that was passed in via params
         request.META["HTTP_CONTENT_TYPE"] = "application/json"

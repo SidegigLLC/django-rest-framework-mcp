@@ -531,9 +531,134 @@ def field_to_json_schema(field: Field) -> Dict[str, Any]:
     return schema
 
 
+def generate_filter_schema(tool: MCPTool) -> Dict[str, Any]:
+    """
+    Generate a JSON schema for the filter fields of a list action.
+
+    Extracts filter fields from the ViewSet's filterset_class (django-filter)
+    and search/ordering fields from DRF filter backends, exposing them as
+    optional tool input parameters so LLMs can pass query filters.
+
+    Args:
+        tool: The MCPTool object containing all tool information.
+
+    Returns:
+        Dict containing filter schema and whether filters are required.
+    """
+    viewset_class = tool.viewset_class
+    properties: Dict[str, Any] = {}
+
+    # Extract filter fields from filterset_class (django-filter)
+    filterset_class = getattr(viewset_class, "filterset_class", None)
+    if filterset_class is not None:
+        try:
+            filterset = filterset_class()
+            for field_name, field in filterset.filters.items():
+                field_schema = _filter_field_to_schema(field_name, field)
+                if field_schema:
+                    properties[field_name] = field_schema
+        except Exception:
+            pass
+    else:
+        # Fall back to filterset_fields if no filterset_class
+        filterset_fields = getattr(viewset_class, "filterset_fields", None)
+        if filterset_fields:
+            for field_name in filterset_fields:
+                properties[field_name] = {
+                    "type": "string",
+                    "description": f"Filter by {field_name}",
+                }
+
+    # Extract search fields from SearchFilter backend
+    filter_backends = getattr(viewset_class, "filter_backends", [])
+    try:
+        from rest_framework.filters import SearchFilter, OrderingFilter
+
+        if any(issubclass(b, SearchFilter) for b in filter_backends):
+            search_fields = getattr(viewset_class, "search_fields", [])
+            if search_fields:
+                properties["search"] = {
+                    "type": "string",
+                    "description": f"Search across: {', '.join(str(f) for f in search_fields)}",
+                }
+
+        if any(issubclass(b, OrderingFilter) for b in filter_backends):
+            ordering_fields = getattr(viewset_class, "ordering_fields", [])
+            if ordering_fields:
+                properties["ordering"] = {
+                    "type": "string",
+                    "description": (
+                        f"Order by: {', '.join(str(f) for f in ordering_fields)}. "
+                        "Prefix with - for descending."
+                    ),
+                }
+    except ImportError:
+        pass
+
+    if not properties:
+        return {"schema": None, "is_required": False}
+
+    return {
+        "schema": {
+            "type": "object",
+            "properties": properties,
+            "required": [],
+        },
+        "is_required": False,
+    }
+
+
+def _filter_field_to_schema(field_name: str, field: Any) -> Dict[str, Any]:
+    """Convert a django-filter field to a JSON schema property."""
+    schema: Dict[str, Any] = {"type": "string"}
+
+    try:
+        from django_filters import (
+            BooleanFilter,
+            NumberFilter,
+            UUIDFilter,
+            BaseInFilter,
+            ChoiceFilter,
+        )
+
+        if isinstance(field, BooleanFilter):
+            schema = {"type": "boolean"}
+        elif isinstance(field, NumberFilter):
+            schema = {"type": "number"}
+        elif isinstance(field, UUIDFilter):
+            schema = {"type": "string"}
+        elif isinstance(field, BaseInFilter):
+            schema = {"type": "string", "description": f"Comma-separated values for {field_name}"}
+        elif isinstance(field, ChoiceFilter):
+            choices = list(field.extra.get("choices", []))
+            if choices:
+                enum_values = [str(c[0]) for c in choices if c[0]]
+                if enum_values:
+                    schema["enum"] = enum_values
+    except ImportError:
+        pass
+
+    # Use label or help_text if available
+    label = getattr(field, "label", None)
+    help_text = getattr(field.field, "help_text", None) if hasattr(field, "field") else None
+
+    if label:
+        schema["title"] = str(label)
+    if help_text:
+        schema["description"] = str(help_text)
+    elif "description" not in schema:
+        schema["description"] = f"Filter by {field_name}"
+
+    return schema
+
+
 def generate_body_schema(tool: MCPTool) -> Dict[str, Any]:
     """
     Generate the body schema for a ViewSet action.
+
+    For list actions, generates a filter schema from the ViewSet's filterset_class
+    and search/ordering backends. For create/update actions, generates a body schema
+    from the serializer class.
 
     Args:
         tool: The MCPTool object containing all tool information.
@@ -553,9 +678,13 @@ def generate_body_schema(tool: MCPTool) -> Dict[str, Any]:
 
     # Fall back to using view_class serializer if input_serializer not provided
     else:
-        # For list, retrieve, destroy actions where no custom input_serializer was provided, we don't expect input
-        if tool.action in ["list", "retrieve", "destroy"]:
+        # For retrieve, destroy actions where no custom input_serializer was provided, we don't expect input
+        if tool.action in ["retrieve", "destroy"]:
             return {"schema": None, "is_required": False}
+
+        # For list actions, generate filter schema instead of body schema
+        if tool.action == "list":
+            return generate_filter_schema(tool)
 
         instance = tool.viewset_class()
         instance.action = tool.action
