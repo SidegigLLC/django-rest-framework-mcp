@@ -201,7 +201,9 @@ class TestMCPClient(unittest.TestCase):
     def test_list_tools_request_structure(self):
         """Test that list_tools creates proper JSON-RPC request."""
         mock_response = Mock()
-        mock_response.content = json.dumps({"jsonrpc": "2.0", "result": {"tools": []}, "id": 1}).encode()
+        mock_response.content = json.dumps(
+            {"jsonrpc": "2.0", "result": {"tools": []}, "id": 1}
+        ).encode()
 
         # Set client as initialized and mock the post method
         self.client._initialized = True
@@ -263,7 +265,9 @@ class TestMCPClient(unittest.TestCase):
         notification_response = Mock()
         notification_response.content = b""
 
-        with patch.object(self.client, "post", side_effect=[init_response, notification_response]) as mock_post:
+        with patch.object(
+            self.client, "post", side_effect=[init_response, notification_response]
+        ) as mock_post:
             result = self.client.initialize()
 
             # Should be marked as initialized

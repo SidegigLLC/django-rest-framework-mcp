@@ -58,7 +58,9 @@ class Product(RESTFrameworkMCPModel):
 class Order(RESTFrameworkMCPModel):
     """Test model for Order."""
 
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="orders")
+    customer = models.ForeignKey(
+        Customer, on_delete=models.CASCADE, related_name="orders"
+    )
     total = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -99,13 +101,17 @@ class RequiredFieldsTestModel(RESTFrameworkMCPModel):
 
     # Case 7: Field with unique constraint but also blank/null (should NOT be required)
     # Per DRF docs: unique fields are required UNLESS they have blank=True or null=True
-    unique_with_blank_null = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    unique_with_blank_null = models.CharField(
+        max_length=100, unique=True, blank=True, null=True
+    )
 
     # Case 7b: Field with unique constraint, no blank/null (should be required)
     unique_no_blank = models.CharField(max_length=100, unique=True)
 
     # Case 8: Field with unique constraint AND default (should not be required)
-    unique_with_default = models.CharField(max_length=100, unique=True, default="unique_default", blank=True, null=True)
+    unique_with_default = models.CharField(
+        max_length=100, unique=True, default="unique_default", blank=True, null=True
+    )
 
     # Case 9: AutoField (should be read-only)
     auto_field = models.AutoField(primary_key=True)

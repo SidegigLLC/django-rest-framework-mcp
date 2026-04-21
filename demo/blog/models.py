@@ -32,7 +32,9 @@ class Post(models.Model):
 
     title = models.CharField(max_length=255)
     content = models.TextField()
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts", null=True, blank=True)
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="posts", null=True, blank=True
+    )
     category = models.CharField(
         max_length=50,
         choices=CATEGORY_CHOICES,
@@ -73,27 +75,43 @@ class Customer(models.Model):
         validators=[MinValueValidator(0.0), MaxValueValidator(30.0)],
         help_text="Interest rate percentage (0.0-30.0%)",
     )
-    is_active = models.BooleanField(default=True, help_text="Whether the customer account is active")
-    created_date = models.DateField(auto_now_add=True, help_text="Date when customer account was created")
-    last_contact_time = models.TimeField(null=True, blank=True, help_text="Time of last customer contact (optional)")
+    is_active = models.BooleanField(
+        default=True, help_text="Whether the customer account is active"
+    )
+    created_date = models.DateField(
+        auto_now_add=True, help_text="Date when customer account was created"
+    )
+    last_contact_time = models.TimeField(
+        null=True, blank=True, help_text="Time of last customer contact (optional)"
+    )
 
     def __str__(self):
         return f"{self.name} ({self.customer_id})"
 
 
 class Order(models.Model):
-    order_number = models.CharField(max_length=20, unique=True, help_text="Unique order identifier")
-    customer_name = models.CharField(max_length=100, help_text="Customer's full name (required)")
+    order_number = models.CharField(
+        max_length=20, unique=True, help_text="Unique order identifier"
+    )
+    customer_name = models.CharField(
+        max_length=100, help_text="Customer's full name (required)"
+    )
     customer_email = models.EmailField(help_text="Customer's email address (required)")
-    shipping_address = models.TextField(help_text="Complete shipping address (required)")
-    notes = models.TextField(blank=True, null=True, help_text="Optional order notes or special instructions")
+    shipping_address = models.TextField(
+        help_text="Complete shipping address (required)"
+    )
+    notes = models.TextField(
+        blank=True, null=True, help_text="Optional order notes or special instructions"
+    )
     total_amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=0.00,
         help_text="Total order amount (calculated from items)",
     )
-    created_at = models.DateTimeField(auto_now_add=True, help_text="When the order was created")
+    created_at = models.DateTimeField(
+        auto_now_add=True, help_text="When the order was created"
+    )
 
     def save(self, *args, **kwargs):
         if not self.order_number:
@@ -121,7 +139,9 @@ class OrderItem(models.Model):
         on_delete=models.CASCADE,
         help_text="The order this item belongs to",
     )
-    product_name = models.CharField(max_length=200, help_text="Name of the product (required)")
+    product_name = models.CharField(
+        max_length=200, help_text="Name of the product (required)"
+    )
     quantity = models.IntegerField(
         validators=[MinValueValidator(1)],
         help_text="Quantity ordered (minimum 1, required)",
@@ -132,7 +152,9 @@ class OrderItem(models.Model):
         validators=[MinValueValidator(0.01)],
         help_text="Price per unit (minimum 0.01, required)",
     )
-    notes = models.TextField(blank=True, null=True, help_text="Optional notes for this specific item")
+    notes = models.TextField(
+        blank=True, null=True, help_text="Optional notes for this specific item"
+    )
 
     def __str__(self):
         return f"{self.quantity}x {self.product_name} @ ${self.unit_price}"

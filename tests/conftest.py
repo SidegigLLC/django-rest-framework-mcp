@@ -8,7 +8,9 @@ def pytest_configure(config):
     """Configure Django settings for pytest."""
     settings.configure(
         DEBUG=True,
-        DATABASES={"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}},
+        DATABASES={
+            "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}
+        },
         SECRET_KEY="test-secret-key-for-testing-only",
         USE_TZ=True,
         STATIC_URL="/static/",

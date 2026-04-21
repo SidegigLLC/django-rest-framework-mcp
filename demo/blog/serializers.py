@@ -69,7 +69,9 @@ class CustomerSerializer(serializers.ModelSerializer):
         help_text="Customer's full name (2-100 characters)",
         label="Full Name",
     )
-    email = serializers.EmailField(help_text="Customer's primary email address", label="Email Address")
+    email = serializers.EmailField(
+        help_text="Customer's primary email address", label="Email Address"
+    )
     phone = serializers.CharField(
         max_length=20,
         min_length=10,
@@ -112,7 +114,9 @@ class CustomerSerializer(serializers.ModelSerializer):
         help_text="Time of last customer contact (optional)",
         label="Last Contact Time",
     )
-    customer_id = serializers.UUIDField(read_only=True, help_text="Unique customer identifier", label="Customer ID")
+    customer_id = serializers.UUIDField(
+        read_only=True, help_text="Unique customer identifier", label="Customer ID"
+    )
 
     class Meta:
         model = Customer
@@ -157,8 +161,12 @@ class OrderSerializer(serializers.ModelSerializer):
         help_text="Customer's full name (required)",
         label="Customer Name",
     )
-    customer_email = serializers.EmailField(help_text="Customer's email address (required)", label="Customer Email")
-    shipping_address = serializers.CharField(help_text="Complete shipping address (required)", label="Shipping Address")
+    customer_email = serializers.EmailField(
+        help_text="Customer's email address (required)", label="Customer Email"
+    )
+    shipping_address = serializers.CharField(
+        help_text="Complete shipping address (required)", label="Shipping Address"
+    )
 
     # Optional field (explicitly marked as not required)
     notes = serializers.CharField(
@@ -178,7 +186,9 @@ class OrderSerializer(serializers.ModelSerializer):
 
     # Read-only fields
     order_number = serializers.CharField(read_only=True)
-    total_amount = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    total_amount = serializers.DecimalField(
+        max_digits=10, decimal_places=2, read_only=True
+    )
     created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:

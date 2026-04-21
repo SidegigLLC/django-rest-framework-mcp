@@ -132,7 +132,9 @@ class MCPClient(Client):
             error = response_data["error"]
             raise Exception(f"MCP protocol error {error['code']}: {error['message']}")
 
-    def call_tool(self, tool_name: str, arguments: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def call_tool(
+        self, tool_name: str, arguments: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """Execute an MCP tool with the specified arguments.
 
         Sends a 'tools/call' request following the MCP protocol. Returns
