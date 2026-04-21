@@ -162,3 +162,5 @@ uv.lock
 
 # Local TODO list
 local-todos.md
+.claude/
+.review-cache
