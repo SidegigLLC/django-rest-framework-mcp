@@ -159,11 +159,17 @@ class SettingsReloadTests(TestCase):
 
     def test_setting_changed_signal_connected(self):
         """Test that the setting_changed signal is connected."""
-        # Verify that our reload function is connected to the signal
+        # Verify that our reload function is connected to the signal.
+        # Django 5.2+ changed _live_receivers to return a (sync, async) tuple;
+        # earlier versions returned a flat list of receivers.
         receivers = setting_changed._live_receivers(sender=None)
+        if isinstance(receivers, tuple):
+            sync_receivers = receivers[0]
+        else:
+            sync_receivers = receivers
         reload_functions = [
             receiver
-            for receiver in receivers
+            for receiver in sync_receivers
             if receiver.__name__ == "reload_mcp_settings"
         ]
         self.assertTrue(len(reload_functions) > 0)
