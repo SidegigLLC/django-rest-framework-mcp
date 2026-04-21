@@ -369,13 +369,14 @@ class TestGenerateToolSchema(unittest.TestCase):
         self.MockViewSet = MockViewSet
         self.MockSerializer = MockSerializer
 
-    def test_list_action_schema(self):
-        """Test schema generation for list action."""
+    def test_list_action_schema_no_filters(self):
+        """Test schema generation for list action without filters."""
         tool = MCPTool(name="list_test", viewset_class=self.MockViewSet, action="list")
         schema = generate_tool_schema(tool)
 
         input_schema = schema["inputSchema"]
         self.assertEqual(input_schema["type"], "object")
+        # No filterset_class on MockViewSet, so no body/filter properties
         self.assertEqual(input_schema["properties"], {})
         self.assertEqual(input_schema["required"], [])
 
@@ -2208,6 +2209,134 @@ class TestChoiceFieldSchemas(unittest.TestCase):
         self.assertEqual(schema["type"], "array")
         self.assertEqual(schema["items"]["type"], "string")
         self.assertEqual(schema["items"]["enum"], [])  # Empty enum in items
+
+
+class TestGenerateFilterSchema(unittest.TestCase):
+    """Test filter schema generation for list actions with filterset_class."""
+
+    def test_list_action_with_filterset_class(self):
+        """Test that list actions with filterset_class expose filter fields in the schema."""
+        try:
+            import django_filters
+        except ImportError:
+            self.skipTest("django-filter not installed")
+
+        from tests.models import Product
+
+        class ProductFilter(django_filters.FilterSet):
+            name = django_filters.CharFilter(lookup_expr="icontains")
+            in_stock = django_filters.BooleanFilter()
+            min_price = django_filters.NumberFilter(
+                field_name="price", lookup_expr="gte"
+            )
+            category = django_filters.UUIDFilter()
+
+            class Meta:
+                model = Product
+                fields = []
+
+        class FilteredViewSet(ModelViewSet):
+            queryset = Product.objects.all()
+            serializer_class = serializers.Serializer
+            filterset_class = ProductFilter
+
+        tool = MCPTool(
+            name="list_products", viewset_class=FilteredViewSet, action="list"
+        )
+        schema = generate_tool_schema(tool)
+
+        input_schema = schema["inputSchema"]
+        # Should have a "body" property containing the filter schema
+        self.assertIn("body", input_schema["properties"])
+
+        body = input_schema["properties"]["body"]
+        props = body["properties"]
+
+        # All filter fields should be present
+        self.assertIn("name", props)
+        self.assertIn("in_stock", props)
+        self.assertIn("min_price", props)
+        self.assertIn("category", props)
+
+        # Types should be correct
+        self.assertEqual(props["in_stock"]["type"], "boolean")
+        self.assertEqual(props["min_price"]["type"], "number")
+
+        # Filter params are never required
+        self.assertEqual(body["required"], [])
+
+        # body itself should not be required at top level
+        self.assertNotIn("body", input_schema["required"])
+
+    def test_list_action_with_filterset_fields(self):
+        """Test that list actions with filterset_fields expose filter fields."""
+        from tests.models import Product
+
+        class SimpleFilteredViewSet(ModelViewSet):
+            queryset = Product.objects.all()
+            serializer_class = serializers.Serializer
+            filterset_fields = ["name", "in_stock", "price"]
+
+        tool = MCPTool(
+            name="list_products", viewset_class=SimpleFilteredViewSet, action="list"
+        )
+        schema = generate_tool_schema(tool)
+
+        input_schema = schema["inputSchema"]
+        self.assertIn("body", input_schema["properties"])
+
+        body = input_schema["properties"]["body"]
+        self.assertIn("name", body["properties"])
+        self.assertIn("in_stock", body["properties"])
+        self.assertIn("price", body["properties"])
+
+    def test_list_action_with_search_and_ordering(self):
+        """Test that search_fields and ordering_fields are exposed."""
+        from rest_framework.filters import OrderingFilter, SearchFilter
+
+        from tests.models import Product
+
+        class SearchableViewSet(ModelViewSet):
+            queryset = Product.objects.all()
+            serializer_class = serializers.Serializer
+            filterset_fields = ["in_stock"]
+            filter_backends = [SearchFilter, OrderingFilter]
+            search_fields = ["name", "description"]
+            ordering_fields = ["name", "price"]
+
+        tool = MCPTool(
+            name="list_products", viewset_class=SearchableViewSet, action="list"
+        )
+        schema = generate_tool_schema(tool)
+
+        body = schema["inputSchema"]["properties"]["body"]
+        self.assertIn("search", body["properties"])
+        self.assertIn("ordering", body["properties"])
+        self.assertIn("name", body["properties"]["search"]["description"])
+        self.assertIn("price", body["properties"]["ordering"]["description"])
+
+    def test_create_action_not_affected(self):
+        """Test that create actions still use serializer schema, not filter schema."""
+        from tests.models import Product
+
+        class FilteredViewSet(ModelViewSet):
+            queryset = Product.objects.all()
+            serializer_class = serializers.Serializer
+            filterset_fields = ["name", "in_stock"]
+
+        tool = MCPTool(
+            name="create_product", viewset_class=FilteredViewSet, action="create"
+        )
+        schema = generate_tool_schema(tool)
+
+        # Create action should use serializer, not filters
+        input_schema = schema["inputSchema"]
+        if "body" in input_schema["properties"]:
+            body = input_schema["properties"]["body"]
+            # Should NOT have filter fields like "in_stock" as a separate filter param
+            # (it would only be there if it's part of the serializer)
+            self.assertNotIn("search", body.get("properties", {}))
+            self.assertNotIn("ordering", body.get("properties", {}))
 
 
 if __name__ == "__main__":

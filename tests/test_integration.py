@@ -2828,3 +2828,93 @@ class TestDurationFieldIntegration(MCPTestCase):
         self.assertIn("duration", required)
         self.assertIn("min_duration", required)
         self.assertNotIn("optional_duration", required)
+
+
+@override_settings(ROOT_URLCONF="tests.urls")
+class FilterInjectionIntegrationTests(TestCase):
+    """End-to-end tests for filter params flowing from MCP body → request.GET."""
+
+    def setUp(self):
+        super().setUp()
+        from rest_framework.filters import OrderingFilter, SearchFilter
+
+        registry.clear()
+
+        backends = [SearchFilter, OrderingFilter]
+        try:
+            from django_filters.rest_framework import DjangoFilterBackend
+
+            backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+        except ImportError:
+            pass
+
+        class ProductFilterSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = Product
+                fields = ["id", "name", "price", "in_stock"]
+
+        @mcp_viewset(basename="filterable_products")
+        class FilterableProductViewSet(viewsets.ModelViewSet):
+            queryset = Product.objects.all().order_by("id")
+            serializer_class = ProductFilterSerializer
+            filter_backends = backends
+            filterset_fields = ["in_stock"]
+            search_fields = ["name"]
+            ordering_fields = ["price", "name"]
+
+        self.client = MCPClient()
+        # Seed products: two in-stock, one out-of-stock
+        self.p_cheap = ProductFactory(
+            name="Apple", price="1.00", in_stock=True, category=None
+        )
+        self.p_mid = ProductFactory(
+            name="Banana", price="5.00", in_stock=True, category=None
+        )
+        self.p_oos = ProductFactory(
+            name="Cherry", price="3.00", in_stock=False, category=None
+        )
+
+    def tearDown(self):
+        registry.clear()
+        super().tearDown()
+
+    def test_filterset_fields_filter_applied(self):
+        """Passing filterset_fields param via body filters the list action."""
+        try:
+            import django_filters  # noqa: F401
+        except ImportError:
+            self.skipTest("django-filter not installed")
+
+        result = self.client.call_tool(
+            "list_filterable_products", {"body": {"in_stock": True}}
+        )
+        self.assertFalse(result.get("isError"))
+        data = result["structuredContent"]
+        names = {p["name"] for p in data}
+        self.assertEqual(names, {"Apple", "Banana"})
+
+    def test_search_filter_applied(self):
+        """Passing 'search' via body narrows results via SearchFilter."""
+        result = self.client.call_tool(
+            "list_filterable_products", {"body": {"search": "Ban"}}
+        )
+        self.assertFalse(result.get("isError"))
+        data = result["structuredContent"]
+        self.assertEqual([p["name"] for p in data], ["Banana"])
+
+    def test_ordering_filter_applied(self):
+        """Passing 'ordering' via body reorders results via OrderingFilter."""
+        result = self.client.call_tool(
+            "list_filterable_products", {"body": {"ordering": "-price"}}
+        )
+        self.assertFalse(result.get("isError"))
+        data = result["structuredContent"]
+        # Banana (5.00) > Cherry (3.00) > Apple (1.00)
+        self.assertEqual([p["name"] for p in data], ["Banana", "Cherry", "Apple"])
+
+    def test_no_filter_returns_all(self):
+        """List with empty body returns all rows (filters are optional)."""
+        result = self.client.call_tool("list_filterable_products")
+        self.assertFalse(result.get("isError"))
+        data = result["structuredContent"]
+        self.assertEqual(len(data), 3)

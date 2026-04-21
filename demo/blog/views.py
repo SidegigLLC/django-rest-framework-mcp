@@ -1,6 +1,7 @@
 from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.response import Response
 
 from blog.models import Customer, Order, Post
@@ -21,6 +22,12 @@ class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     # DEMO: permissions set on the ViewSet will be applied to both API and MCP requests
     permission_classes = [IsAuthorOrReadOnly]
+    # DEMO: SearchFilter and OrderingFilter expose "search" and "ordering" params
+    # to MCP clients on the list action so LLMs can filter/sort results directly.
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ["title", "content"]
+    ordering_fields = ["created_at", "title"]
+    ordering = ["-created_at"]
 
     def get_serializer_class(self):
         if self.action == "bulk_create":
