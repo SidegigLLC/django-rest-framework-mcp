@@ -47,11 +47,7 @@ class Command(BaseCommand):
                 first_name="Test",
                 last_name="User",
             )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Created new user: {username} (password: {password})"
-                )
-            )
+            self.stdout.write(self.style.SUCCESS(f"Created new user: {username} (password: {password})"))
             user_created = True
 
         # Create or get token
@@ -78,9 +74,7 @@ class Command(BaseCommand):
         self.stdout.write(f'   headers={{"Authorization": "Token {token.key}"}}')
 
         self.stdout.write("\n2️⃣ Basic Authentication:")
-        credentials = base64.b64encode(f"{username}:{password}".encode()).decode(
-            "ascii"
-        )
+        credentials = base64.b64encode(f"{username}:{password}".encode()).decode("ascii")
         self.stdout.write(f'   headers={{"Authorization": "Basic {credentials}"}}')
 
         self.stdout.write("\n3️⃣ Session Authentication:")
@@ -91,9 +85,7 @@ class Command(BaseCommand):
         self.stdout.write("   ```python")
         self.stdout.write("   from djangorestframework_mcp.test import MCPClient")
         self.stdout.write("   client = MCPClient()")
-        self.stdout.write(
-            f'   result = client.call_tool("list_posts", HTTP_AUTHORIZATION="Token {token.key}")'
-        )
+        self.stdout.write(f'   result = client.call_tool("list_posts", HTTP_AUTHORIZATION="Token {token.key}")')
         self.stdout.write("   ```")
 
         self.stdout.write("\n5️⃣ Test with curl:")
@@ -102,9 +94,7 @@ class Command(BaseCommand):
         self.stdout.write('     -H "Content-Type: application/json" \\')
         self.stdout.write(f'     -H "Authorization: Token {token.key}" \\')
         self.stdout.write('     -d \'{"jsonrpc": "2.0", "method": "tools/call", \\')
-        self.stdout.write(
-            '          "params": {"name": "list_posts", "arguments": {}}, \\'
-        )
+        self.stdout.write('          "params": {"name": "list_posts", "arguments": {}}, \\')
         self.stdout.write('          "id": 1}\'')
         self.stdout.write("   ```")
 
@@ -118,7 +108,5 @@ class Command(BaseCommand):
         self.stdout.write("   # Create a regular user programmatically")
         self.stdout.write("   python manage.py shell")
         self.stdout.write("   >>> from django.contrib.auth.models import User")
-        self.stdout.write(
-            "   >>> User.objects.create_user('username', 'email@example.com', 'password')"
-        )
+        self.stdout.write("   >>> User.objects.create_user('username', 'email@example.com', 'password')")
         self.stdout.write("\n" + "=" * 70)

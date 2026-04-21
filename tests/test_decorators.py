@@ -58,9 +58,7 @@ class TestMCPViewSetDecorator(unittest.TestCase):
         result = decorator(MockViewSet)
 
         # Check that registry.register_viewset was called
-        mock_registry.register_viewset.assert_called_once_with(
-            MockViewSet, None, "test_tools"
-        )
+        mock_registry.register_viewset.assert_called_once_with(MockViewSet, None, "test_tools")
 
         # Check that the ViewSet class was modified
         self.assertEqual(result, MockViewSet)
@@ -109,9 +107,7 @@ class TestMCPViewSetDecorator(unittest.TestCase):
 
         with patch("djangorestframework_mcp.decorators.registry") as mock_registry:
             mcp_viewset(basename="global_test")(MockViewSet)
-            mock_registry.register_viewset.assert_called_once_with(
-                MockViewSet, None, "global_test"
-            )
+            mock_registry.register_viewset.assert_called_once_with(MockViewSet, None, "global_test")
 
     def test_decorator_rejects_plain_viewset(self):
         """Test that @mcp_viewset rejects plain ViewSet (ViewSetMixin + APIView)."""
@@ -193,9 +189,7 @@ class TestMCPViewSetDecorator(unittest.TestCase):
         result = decorator(MyGenericViewSet)
 
         # Should succeed without raising an error
-        mock_registry.register_viewset.assert_called_once_with(
-            MyGenericViewSet, None, "test_generic"
-        )
+        mock_registry.register_viewset.assert_called_once_with(MyGenericViewSet, None, "test_generic")
         self.assertEqual(result, MyGenericViewSet)
 
 
@@ -571,9 +565,7 @@ class TestSelectiveActionRegistration(unittest.TestCase):
         from tests.models import Customer
         from tests.serializers import CustomerSerializer
 
-        @mcp_viewset(
-            actions=["list", "invalid_action", "create"], basename="invalidaction"
-        )
+        @mcp_viewset(actions=["list", "invalid_action", "create"], basename="invalidaction")
         class InvalidActionViewSet(viewsets.ModelViewSet):
             queryset = Customer.objects.all()
             serializer_class = CustomerSerializer
@@ -649,9 +641,7 @@ class TestCustomToolNamesEdgeCases(unittest.TestCase):
 
         self.assertEqual(tool.name, "completely_custom_name")
         self.assertEqual(tool.title, "Completely Custom Title")
-        self.assertEqual(
-            tool.description, "A completely custom description that explains everything"
-        )
+        self.assertEqual(tool.description, "A completely custom description that explains everything")
 
     def test_unicode_and_special_characters_in_names(self):
         """Test that unicode and special characters work in tool names and descriptions."""
@@ -794,9 +784,7 @@ class TestInstanceRejection(unittest.TestCase):
 
             @mcp_viewset()
             class TestViewSet(viewsets.GenericViewSet):
-                @mcp_tool(
-                    input_serializer=SimpleItemSerializer()
-                )  # Instance, not class
+                @mcp_tool(input_serializer=SimpleItemSerializer())  # Instance, not class
                 @action(detail=False, methods=["post"])
                 def bad_action(self, request):
                     return Response({})
@@ -818,9 +806,7 @@ class TestInstanceRejection(unittest.TestCase):
 
             @mcp_viewset()
             class TestViewSet(viewsets.GenericViewSet):
-                @mcp_tool(
-                    input_serializer=SimpleItemSerializer(many=True)
-                )  # Instance, not class
+                @mcp_tool(input_serializer=SimpleItemSerializer(many=True))  # Instance, not class
                 @action(detail=False, methods=["post"])
                 def bad_action(self, request):
                     return Response({})

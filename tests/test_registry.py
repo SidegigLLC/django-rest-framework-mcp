@@ -51,9 +51,7 @@ class TestMCPRegistry(unittest.TestCase):
 
         # Check that tools were registered
         tools = self.registry.get_all_tools()
-        self.assertEqual(
-            len(tools), 6
-        )  # list, retrieve, create, update, partial_update, destroy
+        self.assertEqual(len(tools), 6)  # list, retrieve, create, update, partial_update, destroy
 
         tool_names = [t.name for t in tools]
         self.assertIn("list_mock", tool_names)
@@ -280,9 +278,7 @@ class TestMCPRegistry(unittest.TestCase):
 
         # Check that singular forms are used appropriately
         retrieve_tool = next(t for t in tools if t.action == "retrieve")
-        self.assertEqual(
-            retrieve_tool.title, "Get Customer"
-        )  # Singular for individual item
+        self.assertEqual(retrieve_tool.title, "Get Customer")  # Singular for individual item
 
         list_tool = next(t for t in tools if t.action == "list")
         self.assertEqual(list_tool.title, "List Customers")  # Plural for list
@@ -362,9 +358,7 @@ class TestMCPRegistry(unittest.TestCase):
                     return Response([])
 
         error_msg = str(cm.exception)
-        self.assertIn(
-            'Tool with name "list_conflict_test" is already registered', error_msg
-        )
+        self.assertIn('Tool with name "list_conflict_test" is already registered', error_msg)
         self.assertIn("Please provide a unique basename", error_msg)
         self.assertIn("SpecialCustomerViewSet", error_msg)
 

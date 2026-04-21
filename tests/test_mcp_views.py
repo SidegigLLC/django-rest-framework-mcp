@@ -52,9 +52,7 @@ class TestMCPView(unittest.TestCase):
         mock_registry.get_all_tools.return_value = [mock_tool]
 
         # Mock schema generation
-        mock_schema = {
-            "inputSchema": {"type": "object", "properties": {}, "required": []}
-        }
+        mock_schema = {"inputSchema": {"type": "object", "properties": {}, "required": []}}
         mock_generate_schema.return_value = mock_schema
 
         result = self.view.handle_tools_list()
@@ -81,9 +79,7 @@ class TestMCPView(unittest.TestCase):
         # Mock execute_tool
         mock_result = {"data": [{"id": 1, "name": "test"}]}
 
-        with patch.object(
-            self.view, "execute_tool", return_value=mock_result
-        ) as mock_execute:
+        with patch.object(self.view, "execute_tool", return_value=mock_result) as mock_execute:
             params = {"name": "test_tool", "arguments": {"param1": "value1"}}
 
             from django.http import HttpRequest
@@ -129,9 +125,7 @@ class TestMCPView(unittest.TestCase):
         mock_registry.get_tool_by_name.return_value = mock_tool_info
 
         # Mock execute_tool to raise exception
-        with patch.object(
-            self.view, "execute_tool", side_effect=Exception("Test error")
-        ):
+        with patch.object(self.view, "execute_tool", side_effect=Exception("Test error")):
             params = {"name": "test_tool", "arguments": {}}
 
             from django.http import HttpRequest
@@ -173,9 +167,7 @@ class TestMCPView(unittest.TestCase):
         """Test POST request with initialize method."""
         request_data = {"jsonrpc": "2.0", "method": "initialize", "params": {}, "id": 1}
 
-        request = self.factory.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        request = self.factory.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         response = self.view.dispatch(request)
 
@@ -197,9 +189,7 @@ class TestMCPView(unittest.TestCase):
             # No 'id' field - this makes it a proper notification
         }
 
-        request = self.factory.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        request = self.factory.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         response = self.view.dispatch(request)
 
@@ -217,9 +207,7 @@ class TestMCPView(unittest.TestCase):
             "id": 1,
         }
 
-        request = self.factory.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        request = self.factory.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         response = self.view.dispatch(request)
 
@@ -230,9 +218,7 @@ class TestMCPView(unittest.TestCase):
 
     def test_post_invalid_json(self):
         """Test POST request with invalid JSON."""
-        request = self.factory.post(
-            "/mcp/", data="invalid json", content_type="application/json"
-        )
+        request = self.factory.post("/mcp/", data="invalid json", content_type="application/json")
 
         response = self.view.dispatch(request)
 
@@ -245,14 +231,10 @@ class TestMCPView(unittest.TestCase):
         """Test POST request exception handling."""
         request_data = {"jsonrpc": "2.0", "method": "initialize", "params": {}, "id": 1}
 
-        request = self.factory.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        request = self.factory.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         # Mock handle_initialize to raise an exception
-        with patch.object(
-            self.view, "handle_initialize", side_effect=Exception("Test error")
-        ):
+        with patch.object(self.view, "handle_initialize", side_effect=Exception("Test error")):
             response = self.view.dispatch(request)
 
             content = json.loads(response.content.decode())
@@ -273,14 +255,10 @@ class TestMCPView(unittest.TestCase):
         mock_viewset_instance.determine_version = Mock(return_value=(None, None))
 
         # Mock the action method
-        mock_action = Mock(
-            return_value=Mock(data={"result": "success"}, status_code=200)
-        )
+        mock_action = Mock(return_value=Mock(data={"result": "success"}, status_code=200))
         mock_viewset_instance.list = mock_action
 
-        tool = MCPTool(
-            name="test_tool", action="list", viewset_class=mock_viewset_class
-        )
+        tool = MCPTool(name="test_tool", action="list", viewset_class=mock_viewset_class)
         params = {}
 
         # Create a mock original request
@@ -304,9 +282,7 @@ class TestMCPView(unittest.TestCase):
         request_arg = call_args[0][0]  # First positional argument
         from rest_framework.request import Request
 
-        self.assertIsInstance(
-            request_arg, Request, "Action should receive DRF Request, not HttpRequest"
-        )
+        self.assertIsInstance(request_arg, Request, "Action should receive DRF Request, not HttpRequest")
 
 
 class TestMCPViewCSRF(unittest.TestCase):
@@ -341,17 +317,13 @@ class TestMCPViewIntegration(unittest.TestCase):
         )
         mock_registry.get_all_tools.return_value = [mock_tool]
 
-        mock_schema = {
-            "inputSchema": {"type": "object", "properties": {}, "required": []}
-        }
+        mock_schema = {"inputSchema": {"type": "object", "properties": {}, "required": []}}
         mock_generate_schema.return_value = mock_schema
 
         # Create request
         request_data = {"jsonrpc": "2.0", "method": "tools/list", "params": {}, "id": 1}
 
-        request = self.factory.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        request = self.factory.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         # Execute
         response = self.view.dispatch(request)
@@ -379,9 +351,7 @@ class MCPViewAuthenticationTests(TestCase):
     def setUp(self):
         """Set up test data."""
         self.factory = RequestFactory()
-        self.user = UserFactory(
-            username="testuser", email="test@example.com", password="testpass"
-        )
+        self.user = UserFactory(username="testuser", email="test@example.com", password="testpass")
         self.token = TokenFactory(user=self.user)
 
     def test_mcpview_authentication_required(self):
@@ -397,9 +367,7 @@ class MCPViewAuthenticationTests(TestCase):
 
         # Create request without authentication
         request_data = {"jsonrpc": "2.0", "method": "tools/list", "params": {}, "id": 1}
-        request = self.factory.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        request = self.factory.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         response = view.dispatch(request)
 
@@ -425,9 +393,7 @@ class MCPViewAuthenticationTests(TestCase):
 
         # Create request without authentication
         request_data = {"jsonrpc": "2.0", "method": "tools/list", "params": {}, "id": 1}
-        request = self.factory.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        request = self.factory.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         response = view.dispatch(request)
 
@@ -475,9 +441,7 @@ class MCPViewAuthenticationTests(TestCase):
 
         # Create request without authentication headers
         request_data = {"jsonrpc": "2.0", "method": "tools/list", "params": {}, "id": 1}
-        request = self.factory.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        request = self.factory.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         with patch("djangorestframework_mcp.views.registry") as mock_registry:
             mock_registry.get_all_tools.return_value = []
@@ -523,13 +487,9 @@ class MCPViewAuthenticationPassthroughTests(TestCase):
                 # Return the authenticated user's info
                 return Response(
                     {
-                        "username": request.user.username
-                        if request.user.is_authenticated
-                        else None,
+                        "username": request.user.username if request.user.is_authenticated else None,
                         "is_authenticated": request.user.is_authenticated,
-                        "user_id": request.user.id
-                        if request.user.is_authenticated
-                        else None,
+                        "user_id": request.user.id if request.user.is_authenticated else None,
                     }
                 )
 
@@ -592,9 +552,7 @@ class MCPViewAuthenticationPassthroughTests(TestCase):
                 # Return the authenticated user's info
                 return Response(
                     {
-                        "username": request.user.username
-                        if hasattr(request.user, "username")
-                        else None,
+                        "username": request.user.username if hasattr(request.user, "username") else None,
                         "is_authenticated": request.user.is_authenticated
                         if hasattr(request.user, "is_authenticated")
                         else False,
@@ -893,9 +851,7 @@ class ErrorResponseTests(TestCase):
     def setUp(self):
         registry.clear()
         registry.register_viewset(AuthenticatedViewSet)
-        self.user = UserFactory(
-            username="testuser", email="test@example.com", password="testpass"
-        )
+        self.user = UserFactory(username="testuser", email="test@example.com", password="testpass")
         self.token = TokenFactory(user=self.user)
 
     def tearDown(self):
@@ -1010,9 +966,7 @@ class Return200ForErrorsTests(TestCase):
 
     def setUp(self):
         self.factory = RequestFactory()
-        self.user = UserFactory(
-            username="testuser", email="test@example.com", password="testpass"
-        )
+        self.user = UserFactory(username="testuser", email="test@example.com", password="testpass")
         self.token = TokenFactory(user=self.user)
 
     def test_auth_error_default_behavior(self):
@@ -1020,9 +974,7 @@ class Return200ForErrorsTests(TestCase):
         from rest_framework import exceptions
 
         view = MCPView()
-        exc = exceptions.NotAuthenticated(
-            "Authentication credentials were not provided."
-        )
+        exc = exceptions.NotAuthenticated("Authentication credentials were not provided.")
         exc.status_code = 401
         exc.auth_header = "Token"
 
@@ -1052,9 +1004,7 @@ class Return200ForErrorsTests(TestCase):
         from rest_framework import exceptions
 
         view = MCPView()
-        exc = exceptions.NotAuthenticated(
-            "Authentication credentials were not provided."
-        )
+        exc = exceptions.NotAuthenticated("Authentication credentials were not provided.")
         exc.status_code = 401
         exc.auth_header = "Token"
 
@@ -1082,9 +1032,7 @@ class Return200ForErrorsTests(TestCase):
         from rest_framework import exceptions
 
         view = MCPView()
-        exc = exceptions.PermissionDenied(
-            "You do not have permission to perform this action."
-        )
+        exc = exceptions.PermissionDenied("You do not have permission to perform this action.")
         exc.status_code = 403
 
         response = view.handle_auth_error(exc, 1)
@@ -1111,9 +1059,7 @@ class Return200ForErrorsTests(TestCase):
         from rest_framework import exceptions
 
         view = MCPView()
-        exc = exceptions.PermissionDenied(
-            "You do not have permission to perform this action."
-        )
+        exc = exceptions.PermissionDenied("You do not have permission to perform this action.")
         exc.status_code = 403
 
         response = view.handle_auth_error(exc, 1)
@@ -1144,12 +1090,8 @@ class Return200ForErrorsTests(TestCase):
         self.assertIn("Method not found", content["error"]["message"])
 
         # Compatibility mode (same behavior expected)
-        with patch(
-            "djangorestframework_mcp.views.mcp_settings.RETURN_200_FOR_ERRORS", True
-        ):
-            response = view.error_response(
-                1, -32601, "Method not found: unknown/method"
-            )
+        with patch("djangorestframework_mcp.views.mcp_settings.RETURN_200_FOR_ERRORS", True):
+            response = view.error_response(1, -32601, "Method not found: unknown/method")
             self.assertEqual(response.status_code, 200)
 
     def test_parse_error_both_modes(self):
@@ -1165,9 +1107,7 @@ class Return200ForErrorsTests(TestCase):
         self.assertEqual(content["error"]["message"], "Parse error")
 
         # Compatibility mode (same behavior expected)
-        with patch(
-            "djangorestframework_mcp.views.mcp_settings.RETURN_200_FOR_ERRORS", True
-        ):
+        with patch("djangorestframework_mcp.views.mcp_settings.RETURN_200_FOR_ERRORS", True):
             response = view.error_response(None, -32700, "Parse error")
             self.assertEqual(response.status_code, 200)
 
@@ -1182,9 +1122,7 @@ class Return200ForErrorsTests(TestCase):
             self.assertEqual(result, {"tools": []})
 
         # Compatibility mode should not affect successful operations
-        with patch(
-            "djangorestframework_mcp.views.mcp_settings.RETURN_200_FOR_ERRORS", True
-        ):
+        with patch("djangorestframework_mcp.views.mcp_settings.RETURN_200_FOR_ERRORS", True):
             with patch("djangorestframework_mcp.views.registry") as mock_registry:
                 mock_registry.get_all_tools.return_value = []
                 result = view.handle_tools_list()

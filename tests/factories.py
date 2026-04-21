@@ -85,9 +85,7 @@ class ProductFactory(factory.django.DjangoModelFactory):
     price = factory.Faker("pydecimal", left_digits=4, right_digits=2, positive=True)
     in_stock = True
     category = factory.SubFactory(CategoryFactory)
-    slug = factory.LazyAttributeSequence(
-        lambda obj, n: f"{obj.name.lower().replace(' ', '-')}-{1000 + n}"
-    )
+    slug = factory.LazyAttributeSequence(lambda obj, n: f"{obj.name.lower().replace(' ', '-')}-{1000 + n}")
 
     class Params:
         """Factory parameters for creating different product types."""
@@ -105,9 +103,7 @@ class ProductFactory(factory.django.DjangoModelFactory):
             )
         )
         cheap = factory.Trait(
-            price=factory.Faker(
-                "pydecimal", left_digits=2, right_digits=2, positive=True, max_value=50
-            )
+            price=factory.Faker("pydecimal", left_digits=2, right_digits=2, positive=True, max_value=50)
         )
 
 
@@ -153,7 +149,5 @@ class OrderFactory(factory.django.DjangoModelFactory):
             )
         )
         small = factory.Trait(
-            total=factory.Faker(
-                "pydecimal", left_digits=2, right_digits=2, positive=True, max_value=50
-            )
+            total=factory.Faker("pydecimal", left_digits=2, right_digits=2, positive=True, max_value=50)
         )

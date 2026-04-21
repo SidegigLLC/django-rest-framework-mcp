@@ -67,9 +67,7 @@ class MCPView(View):
                 result = self.handle_tools_call(params, request)
             else:
                 # Method not found
-                return self.error_response(
-                    request_id, -32601, f"Method not found: {method}"
-                )
+                return self.error_response(request_id, -32601, f"Method not found: {method}")
 
             # Return JSON-RPC response
             return JsonResponse({"jsonrpc": "2.0", "result": result, "id": request_id})
@@ -81,9 +79,7 @@ class MCPView(View):
             exceptions.NotAuthenticated,
             exceptions.PermissionDenied,
         ) as exc:
-            return self.handle_auth_error(
-                exc, body.get("id") if "body" in locals() else None
-            )
+            return self.handle_auth_error(exc, body.get("id") if "body" in locals() else None)
         except Exception as e:
             return self.error_response(
                 body.get("id") if "body" in locals() else None,
@@ -121,9 +117,7 @@ class MCPView(View):
 
         return {"tools": tools}
 
-    def handle_tools_call(
-        self, params: Dict[str, Any], original_request: HttpRequest
-    ) -> Dict[str, Any]:
+    def handle_tools_call(self, params: Dict[str, Any], original_request: HttpRequest) -> Dict[str, Any]:
         """Handle tools/call request."""
         tool_name = params.get("name")
         tool_params = params.get("arguments", {})
@@ -142,15 +136,13 @@ class MCPView(View):
 
             # Per latest MCP specification (2025-06-18), JSON should be returned in both
             # structured content and as stringified text content (the latter for backwards compatibility)
-            response = {
-                "content": [{"type": "text", "text": json.dumps(result, default=str)}]
-            }
+            response = {"content": [{"type": "text", "text": json.dumps(result, default=str)}]}
             # Add structured content if result is JSON-serializable
             try:
                 # Test if result can be JSON serialized (for structuredContent validation)
                 json.dumps(result)
                 response["structuredContent"] = result
-            except (TypeError, ValueError):
+            except TypeError, ValueError:
                 # If result contains non-JSON-serializable data, skip structuredContent
                 # The text content will still contain the string representation
                 pass
@@ -166,9 +158,7 @@ class MCPView(View):
             raise exc
         except Exception as e:
             return {
-                "content": [
-                    {"type": "text", "text": f"Error executing tool: {str(e)}"}
-                ],
+                "content": [{"type": "text", "text": f"Error executing tool: {str(e)}"}],
                 "isError": True,
             }
 
@@ -207,9 +197,7 @@ class MCPView(View):
         request.user = drf_request.user
         request.auth = drf_request.auth
 
-    def handle_auth_error(
-        self, exc: exceptions.APIException, request_id: Optional[Any]
-    ) -> JsonResponse:
+    def handle_auth_error(self, exc: exceptions.APIException, request_id: Optional[Any]) -> JsonResponse:
         """Handle authentication/permission errors with proper HTTP status and headers."""
         headers = {}
 
@@ -228,9 +216,7 @@ class MCPView(View):
                 headers["WWW-Authenticate"] = exc.auth_header
 
         # Determine HTTP status code based on RETURN_200_FOR_ERRORS setting
-        http_status = (
-            HTTPStatus.OK if mcp_settings.RETURN_200_FOR_ERRORS else exc.status_code
-        )
+        http_status = HTTPStatus.OK if mcp_settings.RETURN_200_FOR_ERRORS else exc.status_code
         response = JsonResponse(
             {
                 "jsonrpc": "2.0",
@@ -249,9 +235,7 @@ class MCPView(View):
 
         return response
 
-    def error_response(
-        self, request_id: Optional[Any], code: int, message: str
-    ) -> JsonResponse:
+    def error_response(self, request_id: Optional[Any], code: int, message: str) -> JsonResponse:
         """Create a JSON-RPC error response."""
         return JsonResponse(
             {
@@ -261,9 +245,7 @@ class MCPView(View):
             }
         )
 
-    def execute_tool(
-        self, tool: MCPTool, params: Dict[str, Any], original_request: HttpRequest
-    ) -> Any:
+    def execute_tool(self, tool: MCPTool, params: Dict[str, Any], original_request: HttpRequest) -> Any:
         """Execute a tool using the structured kwargs+body parameter format.
 
         This method manually calls DRF lifecycle methods to ensure proper
@@ -364,9 +346,7 @@ class MCPView(View):
             exceptions.PermissionDenied,
         ) as exc:
             # Set WWW-Authenticate header for auth-related permission errors
-            if isinstance(
-                exc, (exceptions.AuthenticationFailed, exceptions.NotAuthenticated)
-            ):
+            if isinstance(exc, (exceptions.AuthenticationFailed, exceptions.NotAuthenticated)):
                 authenticators = viewset.get_authenticators()
                 if authenticators:
                     exc.auth_header = authenticators[0].authenticate_header(drf_request)  # type: ignore[union-attr]
@@ -376,9 +356,7 @@ class MCPView(View):
         viewset.check_throttles(drf_request)
 
         # Handle versioning
-        version, scheme = viewset.determine_version(
-            drf_request, *viewset.args, **viewset.kwargs
-        )
+        version, scheme = viewset.determine_version(drf_request, *viewset.args, **viewset.kwargs)
         drf_request.version, drf_request.versioning_scheme = version, scheme
 
         # Step 4: Get and call the action method directly

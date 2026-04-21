@@ -96,12 +96,8 @@ class MCPToolExecutionTests(MCPTestCase):
         # Initialize MCP client for all tests
         self.client = MCPClient()
         # Create test data
-        self.customer1 = CustomerFactory(
-            name="Alice Smith", email="alice@example.com", age=30, is_active=True
-        )
-        self.customer2 = CustomerFactory(
-            name="Bob Jones", email="bob@example.com", age=25, is_active=False
-        )
+        self.customer1 = CustomerFactory(name="Alice Smith", email="alice@example.com", age=30, is_active=True)
+        self.customer2 = CustomerFactory(name="Bob Jones", email="bob@example.com", age=25, is_active=False)
 
     def test_list_customers(self):
         """Test listing customers via MCP."""
@@ -121,9 +117,7 @@ class MCPToolExecutionTests(MCPTestCase):
 
     def test_retrieve_customer(self):
         """Test retrieving a specific customer via MCP."""
-        result = self.client.call_tool(
-            "retrieve_customers", {"kwargs": {"pk": str(self.customer1.id)}}
-        )
+        result = self.client.call_tool("retrieve_customers", {"kwargs": {"pk": str(self.customer1.id)}})
 
         # Should not have errors
         self.assertFalse(result.get("isError"))
@@ -213,9 +207,7 @@ class MCPToolExecutionTests(MCPTestCase):
         """Test deleting a customer via MCP."""
         initial_count = Customer.objects.count()
 
-        result = self.client.call_tool(
-            "destroy_customers", {"kwargs": {"pk": str(self.customer1.id)}}
-        )
+        result = self.client.call_tool("destroy_customers", {"kwargs": {"pk": str(self.customer1.id)}})
 
         # Should not have errors
         self.assertFalse(result.get("isError"))
@@ -230,9 +222,7 @@ class MCPToolExecutionTests(MCPTestCase):
 
     def test_error_handling_not_found(self):
         """Test error handling for non-existent customer."""
-        result = self.client.call_tool(
-            "retrieve_customers", {"kwargs": {"pk": "99999"}}
-        )
+        result = self.client.call_tool("retrieve_customers", {"kwargs": {"pk": "99999"}})
 
         # Should return an error response
         self.assertTrue(result.get("isError"))
@@ -263,9 +253,7 @@ class MCPToolExecutionTests(MCPTestCase):
         # Check for validation-related error messages
         error_text = result["content"][0]["text"].lower()
         self.assertTrue(
-            "validation" in error_text
-            or "already exists" in error_text
-            or "unique" in error_text,
+            "validation" in error_text or "already exists" in error_text or "unique" in error_text,
             f"Expected error message about validation, got: {error_text}",
         )
 
@@ -321,9 +309,7 @@ class MCPLegacyContentTests(MCPTestCase):
         # Initialize MCP client for all tests
         self.client = MCPClient()
         # Create test data
-        self.customer = CustomerFactory(
-            name="Test Customer", email="test@example.com", age=25, is_active=True
-        )
+        self.customer = CustomerFactory(name="Test Customer", email="test@example.com", age=25, is_active=True)
 
     def test_text_content_matches_structured_content(self):
         """Test that legacy text content matches structured content."""
@@ -346,9 +332,7 @@ class MCPLegacyContentTests(MCPTestCase):
 
     def test_text_content_for_single_object(self):
         """Test text content format for single object responses."""
-        result = self.client.call_tool(
-            "retrieve_customers", {"kwargs": {"pk": str(self.customer.id)}}
-        )
+        result = self.client.call_tool("retrieve_customers", {"kwargs": {"pk": str(self.customer.id)}})
 
         # Should not have errors
         self.assertFalse(result.get("isError"))
@@ -363,9 +347,7 @@ class MCPLegacyContentTests(MCPTestCase):
 
     def test_text_content_for_error_responses(self):
         """Test that error responses have text content with error messages."""
-        result = self.client.call_tool(
-            "retrieve_customers", {"kwargs": {"pk": "99999"}}
-        )
+        result = self.client.call_tool("retrieve_customers", {"kwargs": {"pk": "99999"}})
 
         # Should have errors
         self.assertTrue(result.get("isError"))
@@ -374,8 +356,7 @@ class MCPLegacyContentTests(MCPTestCase):
         self.assertIn("content", result)
         error_text = result["content"][0]["text"]
         self.assertTrue(
-            "not found" in error_text.lower()
-            or "no customer matches" in error_text.lower(),
+            "not found" in error_text.lower() or "no customer matches" in error_text.lower(),
             f"Expected error message about not found, got: {error_text}",
         )
 
@@ -408,9 +389,7 @@ class MCPProtocolTests(MCPTestCase):
             "id": 1,
         }
 
-        response = client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         self.assertEqual(response.status_code, 200)
 
@@ -429,9 +408,7 @@ class MCPProtocolTests(MCPTestCase):
 
         request_data = {"jsonrpc": "2.0", "method": "tools/list", "params": {}, "id": 2}
 
-        response = client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         self.assertEqual(response.status_code, 200)
 
@@ -454,9 +431,7 @@ class MCPProtocolTests(MCPTestCase):
 
         request_data = {"jsonrpc": "2.0", "method": "tools/list", "params": {}, "id": 2}
 
-        response = client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
@@ -470,9 +445,7 @@ class MCPProtocolTests(MCPTestCase):
         self.assertEqual(list_tool["title"], "List Customers")
 
         # Check retrieve tool title
-        retrieve_tool = next(
-            (t for t in tools if t["name"] == "retrieve_customers"), None
-        )
+        retrieve_tool = next((t for t in tools if t["name"] == "retrieve_customers"), None)
         self.assertIsNotNone(retrieve_tool)
         self.assertIn("title", retrieve_tool)
         self.assertEqual(retrieve_tool["title"], "Get Customer")
@@ -496,9 +469,7 @@ class MCPProtocolTests(MCPTestCase):
             # No 'id' field - this makes it a notification
         }
 
-        response = client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         # Per JSON-RPC 2.0, notifications should not return any response content
         # We return 204 No Content to indicate successful processing without response
@@ -511,9 +482,7 @@ class MCPProtocolTests(MCPTestCase):
 
         client = Client()
 
-        response = client.post(
-            "/mcp/", data="invalid json{", content_type="application/json"
-        )
+        response = client.post("/mcp/", data="invalid json{", content_type="application/json")
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
@@ -536,9 +505,7 @@ class MCPProtocolTests(MCPTestCase):
             "id": 101,
         }
 
-        response = client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
@@ -561,9 +528,7 @@ class MCPProtocolTests(MCPTestCase):
             "id": 102,
         }
 
-        response = client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
@@ -593,9 +558,7 @@ class MCPProtocolTests(MCPTestCase):
             "id": 106,
         }
 
-        response = client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
@@ -627,9 +590,7 @@ class MCPProtocolTests(MCPTestCase):
             "id": 104,
         }
 
-        response = client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
@@ -666,9 +627,7 @@ class MCPProtocolTests(MCPTestCase):
             "id": 105,
         }
 
-        response = client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
@@ -714,9 +673,7 @@ class TestMCPRequestConditionalLogic(MCPTestCase):
         class FilteredCustomerViewSet(viewsets.ModelViewSet):
             def get_queryset(self):
                 # MCP clients only see active customers
-                if hasattr(self, "request") and getattr(
-                    self.request, "is_mcp_request", False
-                ):
+                if hasattr(self, "request") and getattr(self.request, "is_mcp_request", False):
                     return Customer.objects.filter(is_active=True)
                 return Customer.objects.all()
 
@@ -749,9 +706,7 @@ class TestMCPRequestConditionalLogic(MCPTestCase):
 
             def get_serializer_class(self):
                 # Use simplified serializer for MCP requests
-                if hasattr(self, "request") and getattr(
-                    self.request, "is_mcp_request", False
-                ):
+                if hasattr(self, "request") and getattr(self.request, "is_mcp_request", False):
                     return SimplifiedCustomerSerializer
                 from tests.serializers import CustomerSerializer
 
@@ -805,12 +760,8 @@ class TestMCPRequestConditionalLogic(MCPTestCase):
                     return Response(
                         {
                             "total_customers": Customer.objects.count(),
-                            "active_customers": Customer.objects.filter(
-                                is_active=True
-                            ).count(),
-                            "inactive_customers": Customer.objects.filter(
-                                is_active=False
-                            ).count(),
+                            "active_customers": Customer.objects.filter(is_active=True).count(),
+                            "inactive_customers": Customer.objects.filter(is_active=False).count(),
                             "avg_age": 27.5,
                             "type": "detailed_stats",
                         }
@@ -947,9 +898,7 @@ class TestViewSetInheritancePatterns(MCPTestCase):
             def list(self, request, *args, **kwargs):
                 response = super().list(request, *args, **kwargs)
                 # Add base context to all list responses
-                return Response(
-                    {"data": response.data, "meta": self.get_base_context()}
-                )
+                return Response({"data": response.data, "meta": self.get_base_context()})
 
             class Meta:
                 abstract = True
@@ -1004,9 +953,7 @@ class TestListSerializerIntegration(MCPTestCase):
             @mcp_tool(input_serializer=SimpleItemSerializer)
             @action(detail=False, methods=["post"])
             def create_single(self, request):
-                return Response(
-                    {"message": "Single item created", "item": request.data}
-                )
+                return Response({"message": "Single item created", "item": request.data})
 
             @mcp_tool(input_serializer=SimpleItemListSerializer)
             @action(detail=False, methods=["post"])
@@ -1157,9 +1104,7 @@ class AuthenticationIntegrationTests(MCPTestCase):
     def setUp(self):
         """Set up test data."""
         super().setUp()
-        self.user = UserFactory(
-            username="testuser", email="test@example.com", password="testpass"
-        )
+        self.user = UserFactory(username="testuser", email="test@example.com", password="testpass")
         self.token = TokenFactory(user=self.user)
         self.client = MCPClient()
 
@@ -1224,9 +1169,7 @@ class AuthenticationIntegrationTests(MCPTestCase):
 
         # Should get a valid HTTP response (exact status depends on ViewSet config)
         # The important thing is that it doesn't break due to MCP changes
-        self.assertIn(
-            response.status_code, [200, 401, 403, 404]
-        )  # Valid HTTP responses
+        self.assertIn(response.status_code, [200, 401, 403, 404])  # Valid HTTP responses
 
         # If it's 200, check the response format
         if response.status_code == 200:
@@ -1252,9 +1195,7 @@ class ViewSetAuthenticationTests(TestCase):
         registry.register_viewset(CustomPermissionViewSet)
 
         # Create test user and token
-        self.user = UserFactory(
-            username="testuser", email="test@example.com", password="testpass"
-        )
+        self.user = UserFactory(username="testuser", email="test@example.com", password="testpass")
         self.token = TokenFactory(user=self.user)
 
         self.client = MCPClient()
@@ -1292,9 +1233,7 @@ class ViewSetAuthenticationTests(TestCase):
 
         # Should return error result instead of raising exception
         self.assertTrue(result.get("isError"))
-        self.assertIn(
-            "Authentication credentials were not provided", result["content"][0]["text"]
-        )
+        self.assertIn("Authentication credentials were not provided", result["content"][0]["text"])
 
     def test_session_authentication_success(self):
         """Verifies MCP requests work with valid session cookies."""
@@ -1307,9 +1246,7 @@ class ViewSetAuthenticationTests(TestCase):
 
         # Should return error result instead of raising exception
         self.assertTrue(result.get("isError"))
-        self.assertIn(
-            "Authentication credentials were not provided", result["content"][0]["text"]
-        )
+        self.assertIn("Authentication credentials were not provided", result["content"][0]["text"])
 
     def test_basic_authentication_success(self):
         """Verifies MCP requests work with valid basic auth credentials."""
@@ -1347,9 +1284,7 @@ class ViewSetAuthenticationTests(TestCase):
 
         # Should return error result instead of raising exception
         self.assertTrue(result.get("isError"))
-        self.assertIn(
-            "Authentication credentials were not provided", result["content"][0]["text"]
-        )
+        self.assertIn("Authentication credentials were not provided", result["content"][0]["text"])
 
     def test_unauthenticated_viewset_allows_access(self):
         """Verifies ViewSets without auth requirements work without authentication."""
@@ -1467,15 +1402,11 @@ class MixedAuthenticationTests(TestCase):
         registry.clear()
 
         # Create test user and token
-        self.user = UserFactory(
-            username="testuser", email="test@example.com", password="testpass"
-        )
+        self.user = UserFactory(username="testuser", email="test@example.com", password="testpass")
         self.token = TokenFactory(user=self.user)
 
         # Create a second user for permission testing
-        self.other_user = UserFactory(
-            username="otheruser", email="other@example.com", password="otherpass"
-        )
+        self.other_user = UserFactory(username="otheruser", email="other@example.com", password="otherpass")
         self.other_token = TokenFactory(user=self.other_user)
 
     def tearDown(self):
@@ -1519,9 +1450,7 @@ class MixedAuthenticationTests(TestCase):
         @mcp_viewset()
         class BypassAuthPermViewSet(viewsets.GenericViewSet):
             authentication_classes = [TokenAuthentication]  # This will be bypassed
-            permission_classes = [
-                IsAuthenticated
-            ]  # This should work with preserved user context
+            permission_classes = [IsAuthenticated]  # This should work with preserved user context
 
             def list(self, request):
                 return Response(
@@ -1665,9 +1594,7 @@ class Return200ForErrorsIntegrationTests(TestCase):
         registry.register_viewset(CustomPermissionViewSet)
 
         # Create test user and token
-        self.user = UserFactory(
-            username="testuser", email="test@example.com", password="testpass"
-        )
+        self.user = UserFactory(username="testuser", email="test@example.com", password="testpass")
         self.token = TokenFactory(user=self.user)
 
     def tearDown(self):
@@ -1785,9 +1712,7 @@ class Return200ForErrorsIntegrationTests(TestCase):
         }
 
         # Should return 401 since no auth provided
-        response = client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         self.assertEqual(response.status_code, 401)
         data = json.loads(response.content)
@@ -1811,9 +1736,7 @@ class Return200ForErrorsIntegrationTests(TestCase):
         }
 
         # Should return 200 but with error in body
-        response = client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
@@ -1837,9 +1760,7 @@ class Return200ForErrorsIntegrationTests(TestCase):
         }
 
         # Should return 403 due to custom permission that always denies
-        response = client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         self.assertEqual(response.status_code, 403)
         data = json.loads(response.content)
@@ -1863,9 +1784,7 @@ class Return200ForErrorsIntegrationTests(TestCase):
         }
 
         # Should return 200 but with error in body
-        response = client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
@@ -1945,9 +1864,7 @@ class Return200ForErrorsIntegrationTests(TestCase):
             "id": 1,
         }
 
-        response = client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         # Successful requests should still return 200
         self.assertEqual(response.status_code, 200)
@@ -2012,9 +1929,7 @@ class RelationshipFieldIntegrationTests(TestCase):
         class ProductWithTagsSerializer(serializers.ModelSerializer):
             """Serializer with ManyToMany relationship using PrimaryKeyRelatedField."""
 
-            tags = serializers.PrimaryKeyRelatedField(
-                queryset=Tag.objects.all(), many=True, required=False
-            )
+            tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True, required=False)
 
             class Meta:
                 model = Product
@@ -2060,12 +1975,8 @@ class RelationshipFieldIntegrationTests(TestCase):
         self.client = MCPClient()
 
         # Create test data
-        self.customer1 = CustomerFactory(
-            name="Alice Smith", email="alice@example.com", age=30
-        )
-        self.customer2 = CustomerFactory(
-            name="Bob Jones", email="bob@example.com", age=25
-        )
+        self.customer1 = CustomerFactory(name="Alice Smith", email="alice@example.com", age=30)
+        self.customer2 = CustomerFactory(name="Bob Jones", email="bob@example.com", age=25)
 
         self.category1 = CategoryFactory(name="Electronics", slug="electronics")
         self.category2 = CategoryFactory(name="Books", slug="books")
@@ -2387,9 +2298,7 @@ class ChoiceFieldIntegrationTests(TestCase):
                 ("docs", "Documentation"),
             ]
 
-            tags = serializers.MultipleChoiceField(
-                choices=TAG_CHOICES, allow_empty=False
-            )
+            tags = serializers.MultipleChoiceField(choices=TAG_CHOICES, allow_empty=False)
             summary = serializers.CharField(max_length=100)
 
         @mcp_viewset()
@@ -2496,9 +2405,7 @@ class ChoiceFieldIntegrationTests(TestCase):
         tools = result["tools"]
 
         # Find the priority choice tool
-        priority_tool = next(
-            t for t in tools if t["name"] == "create_with_priority_priority"
-        )
+        priority_tool = next(t for t in tools if t["name"] == "create_with_priority_priority")
         body_schema = priority_tool["inputSchema"]["properties"]["body"]
 
         # Check priority field has string enum (MCP compliance)
@@ -2532,9 +2439,7 @@ class ChoiceFieldIntegrationTests(TestCase):
         tools = result["tools"]
 
         # Find the required tags tool
-        required_tags_tool = next(
-            t for t in tools if t["name"] == "create_with_required_tags_requiredtags"
-        )
+        required_tags_tool = next(t for t in tools if t["name"] == "create_with_required_tags_requiredtags")
         body_schema = required_tags_tool["inputSchema"]["properties"]["body"]
 
         # Check tags field has minItems constraint and string enum items
@@ -2655,16 +2560,12 @@ class TestCompositeFieldsIntegration(MCPTestCase):
         class TagListSerializer(serializers.Serializer):
             """Serializer with ListField for tags."""
 
-            tags = serializers.ListField(
-                child=serializers.CharField(max_length=50), min_length=1, max_length=10
-            )
+            tags = serializers.ListField(child=serializers.CharField(max_length=50), min_length=1, max_length=10)
 
         class MetadataSerializer(serializers.Serializer):
             """Serializer with DictField for metadata."""
 
-            metadata = serializers.DictField(
-                child=serializers.CharField(), allow_empty=False
-            )
+            metadata = serializers.DictField(child=serializers.CharField(), allow_empty=False)
 
         class ConfigSerializer(serializers.Serializer):
             """Serializer with JSONField for configuration."""
@@ -2760,17 +2661,13 @@ class TestDurationFieldIntegration(MCPTestCase):
         class TimerSerializer(serializers.Serializer):
             """Serializer with DurationField for time tracking."""
 
-            duration = serializers.DurationField(
-                help_text="Time duration in ISO 8601 format"
-            )
+            duration = serializers.DurationField(help_text="Time duration in ISO 8601 format")
             min_duration = serializers.DurationField(
                 min_value=timedelta(minutes=5),
                 max_value=timedelta(hours=2),
                 help_text="Duration between 5 minutes and 2 hours",
             )
-            optional_duration = serializers.DurationField(
-                required=False, default=timedelta(hours=1)
-            )
+            optional_duration = serializers.DurationField(required=False, default=timedelta(hours=1))
 
         # Register ViewSet with the serializer
         @mcp_viewset(basename="timer")
@@ -2864,15 +2761,9 @@ class FilterInjectionIntegrationTests(TestCase):
 
         self.client = MCPClient()
         # Seed products: two in-stock, one out-of-stock
-        self.p_cheap = ProductFactory(
-            name="Apple", price="1.00", in_stock=True, category=None
-        )
-        self.p_mid = ProductFactory(
-            name="Banana", price="5.00", in_stock=True, category=None
-        )
-        self.p_oos = ProductFactory(
-            name="Cherry", price="3.00", in_stock=False, category=None
-        )
+        self.p_cheap = ProductFactory(name="Apple", price="1.00", in_stock=True, category=None)
+        self.p_mid = ProductFactory(name="Banana", price="5.00", in_stock=True, category=None)
+        self.p_oos = ProductFactory(name="Cherry", price="3.00", in_stock=False, category=None)
 
     def tearDown(self):
         registry.clear()
@@ -2885,9 +2776,7 @@ class FilterInjectionIntegrationTests(TestCase):
         except ImportError:
             self.skipTest("django-filter not installed")
 
-        result = self.client.call_tool(
-            "list_filterable_products", {"body": {"in_stock": True}}
-        )
+        result = self.client.call_tool("list_filterable_products", {"body": {"in_stock": True}})
         self.assertFalse(result.get("isError"))
         data = result["structuredContent"]
         names = {p["name"] for p in data}
@@ -2895,18 +2784,14 @@ class FilterInjectionIntegrationTests(TestCase):
 
     def test_search_filter_applied(self):
         """Passing 'search' via body narrows results via SearchFilter."""
-        result = self.client.call_tool(
-            "list_filterable_products", {"body": {"search": "Ban"}}
-        )
+        result = self.client.call_tool("list_filterable_products", {"body": {"search": "Ban"}})
         self.assertFalse(result.get("isError"))
         data = result["structuredContent"]
         self.assertEqual([p["name"] for p in data], ["Banana"])
 
     def test_ordering_filter_applied(self):
         """Passing 'ordering' via body reorders results via OrderingFilter."""
-        result = self.client.call_tool(
-            "list_filterable_products", {"body": {"ordering": "-price"}}
-        )
+        result = self.client.call_tool("list_filterable_products", {"body": {"ordering": "-price"}})
         self.assertFalse(result.get("isError"))
         data = result["structuredContent"]
         # Banana (5.00) > Cherry (3.00) > Apple (1.00)

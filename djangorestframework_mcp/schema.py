@@ -214,14 +214,10 @@ def get_choice_field_schema(field: serializers.ChoiceField) -> Dict[str, Any]:
 
     # Add description with choice display names if they differ from values
     display_names = [str(display) for display in flat_choices.values()]
-    if display_names and any(
-        str(val) != display for val, display in zip(choice_values, display_names)
-    ):
+    if display_names and any(str(val) != display for val, display in zip(choice_values, display_names)):
         # Create clear key-value mappings: "1" = Low Priority, "2" = Medium Priority
         mappings = [
-            f'"{str(val)}" = {display}'
-            for val, display in zip(choice_values, display_names)
-            if str(val) != display
+            f'"{str(val)}" = {display}' for val, display in zip(choice_values, display_names) if str(val) != display
         ]
         if mappings:
             schema["description"] = f"Valid choices: {', '.join(mappings)}"
@@ -461,17 +457,9 @@ def field_to_json_schema(field: Field) -> Dict[str, Any]:
     schema = get_base_schema_for_field(field)
 
     # Apply numeric constraints (minimum/maximum) if not already handled by field-specific schema generator
-    if (
-        "maximum" not in schema
-        and hasattr(field, "max_value")
-        and field.max_value is not None
-    ):
+    if "maximum" not in schema and hasattr(field, "max_value") and field.max_value is not None:
         schema["maximum"] = field.max_value
-    if (
-        "minimum" not in schema
-        and hasattr(field, "min_value")
-        and field.min_value is not None
-    ):
+    if "minimum" not in schema and hasattr(field, "min_value") and field.min_value is not None:
         schema["minimum"] = field.min_value
 
     # Apply string constraints (minLength/maxLength)
@@ -501,11 +489,7 @@ def field_to_json_schema(field: Field) -> Dict[str, Any]:
                 break
 
     # Apply default value if present and not already handled by field-specific schema generator
-    if (
-        "default" not in schema
-        and hasattr(field, "default")
-        and field.default is not serializers.empty
-    ):
+    if "default" not in schema and hasattr(field, "default") and field.default is not serializers.empty:
         # Convert callable defaults to their values
         default = field.default() if callable(field.default) else field.default
         # Only include JSON-serializable defaults
@@ -596,8 +580,7 @@ def generate_filter_schema(tool: MCPTool) -> Dict[str, Any]:
                 properties["ordering"] = {
                     "type": "string",
                     "description": (
-                        f"Order by: {', '.join(str(f) for f in ordering_fields)}. "
-                        "Prefix with - for descending."
+                        f"Order by: {', '.join(str(f) for f in ordering_fields)}. Prefix with - for descending."
                     ),
                 }
     except ImportError:
@@ -651,9 +634,7 @@ def _filter_field_to_schema(field_name: str, field: Any) -> Dict[str, Any]:
 
     # Use label or help_text if available
     label = getattr(field, "label", None)
-    help_text = (
-        getattr(field.field, "help_text", None) if hasattr(field, "field") else None
-    )
+    help_text = getattr(field.field, "help_text", None) if hasattr(field, "field") else None
 
     if label:
         schema["title"] = str(label)

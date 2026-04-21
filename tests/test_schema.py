@@ -22,9 +22,7 @@ class TestFieldToJsonSchema(unittest.TestCase):
 
     def test_char_field(self):
         """Test CharField conversion."""
-        field = serializers.CharField(
-            max_length=100, min_length=5, help_text="A test field"
-        )
+        field = serializers.CharField(max_length=100, min_length=5, help_text="A test field")
         schema = field_to_json_schema(field)
 
         self.assertEqual(schema["type"], "string")
@@ -154,9 +152,7 @@ class TestFieldToJsonSchema(unittest.TestCase):
 
     def test_field_with_help_text_and_label(self):
         """Test field with both help_text and label."""
-        field = serializers.CharField(
-            label="Field Title", help_text="This is a helpful description"
-        )
+        field = serializers.CharField(label="Field Title", help_text="This is a helpful description")
         schema = field_to_json_schema(field)
 
         # Label should be title, help_text should be description
@@ -201,9 +197,7 @@ class TestFieldToJsonSchema(unittest.TestCase):
 
     def test_field_with_help_text_and_format_description(self):
         """Test field combines help_text with format description."""
-        field = serializers.DateTimeField(
-            format="%Y-%m-%d %H:%M:%S", help_text="When the event occurred"
-        )
+        field = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", help_text="When the event occurred")
         schema = field_to_json_schema(field)
 
         # Should combine help_text and format description (ISO-8601 since that's what DRF accepts)
@@ -216,9 +210,7 @@ class TestFieldToJsonSchema(unittest.TestCase):
 
     def test_regex_field_basic_schema(self):
         """Test RegexField with simple regex pattern generates correct schema."""
-        field = serializers.RegexField(
-            regex=r"^\+?1?\d{9,15}$", help_text="Phone number"
-        )
+        field = serializers.RegexField(regex=r"^\+?1?\d{9,15}$", help_text="Phone number")
         schema = field_to_json_schema(field)
 
         self.assertEqual(schema["type"], "string")
@@ -382,9 +374,7 @@ class TestGenerateToolSchema(unittest.TestCase):
 
     def test_retrieve_action_schema(self):
         """Test schema generation for retrieve action."""
-        tool = MCPTool(
-            name="retrieve_test", viewset_class=self.MockViewSet, action="retrieve"
-        )
+        tool = MCPTool(name="retrieve_test", viewset_class=self.MockViewSet, action="retrieve")
         schema = generate_tool_schema(tool)
 
         input_schema = schema["inputSchema"]
@@ -400,9 +390,7 @@ class TestGenerateToolSchema(unittest.TestCase):
 
     def test_create_action_schema(self):
         """Test schema generation for create action."""
-        tool = MCPTool(
-            name="create_test", viewset_class=self.MockViewSet, action="create"
-        )
+        tool = MCPTool(name="create_test", viewset_class=self.MockViewSet, action="create")
         schema = generate_tool_schema(tool)
 
         input_schema = schema["inputSchema"]
@@ -423,9 +411,7 @@ class TestGenerateToolSchema(unittest.TestCase):
 
     def test_update_action_schema(self):
         """Test schema generation for update action."""
-        tool = MCPTool(
-            name="update_test", viewset_class=self.MockViewSet, action="update"
-        )
+        tool = MCPTool(name="update_test", viewset_class=self.MockViewSet, action="update")
         schema = generate_tool_schema(tool)
 
         input_schema = schema["inputSchema"]
@@ -481,9 +467,7 @@ class TestGenerateToolSchema(unittest.TestCase):
 
     def test_destroy_action_schema(self):
         """Test schema generation for destroy action."""
-        tool = MCPTool(
-            name="destroy_test", viewset_class=self.MockViewSet, action="destroy"
-        )
+        tool = MCPTool(name="destroy_test", viewset_class=self.MockViewSet, action="destroy")
         schema = generate_tool_schema(tool)
 
         input_schema = schema["inputSchema"]
@@ -522,9 +506,7 @@ class TestGenerateToolSchema(unittest.TestCase):
             pass
 
         # Create tool with explicit input_serializer
-        tool = MCPTool(
-            name="test_custom_input", viewset_class=NoSerializerViewSet, action="create"
-        )
+        tool = MCPTool(name="test_custom_input", viewset_class=NoSerializerViewSet, action="create")
         tool.input_serializer = CustomInputSerializer
 
         # Should work without error since input_serializer is provided
@@ -555,9 +537,7 @@ class TestGenerateToolSchema(unittest.TestCase):
 
         # Mock the instance creation and action setting
         with patch.object(DynamicViewSet, "__init__", return_value=None):
-            tool = MCPTool(
-                name="test_dynamic", viewset_class=DynamicViewSet, action="create"
-            )
+            tool = MCPTool(name="test_dynamic", viewset_class=DynamicViewSet, action="create")
             schema = generate_tool_schema(tool)
 
         input_schema = schema["inputSchema"]
@@ -773,9 +753,7 @@ class TestReadOnlyFieldHandling(unittest.TestCase):
             name = serializers.CharField()
             value = serializers.IntegerField()
             # Note: ListField not yet supported, using CharField for test
-            children_ids = serializers.CharField(
-                required=False, help_text="Comma-separated child IDs"
-            )
+            children_ids = serializers.CharField(required=False, help_text="Comma-separated child IDs")
 
         schema = get_serializer_schema(TreeNodeSerializer())
 
@@ -948,12 +926,8 @@ class TestSchemaRequiredFields(unittest.TestCase):
             bool_allow_null = serializers.BooleanField(allow_null=True)
 
             # Combined with other options
-            string_null_optional = serializers.CharField(
-                allow_null=True, required=False
-            )
-            string_null_with_default = serializers.CharField(
-                allow_null=True, default="default"
-            )
+            string_null_optional = serializers.CharField(allow_null=True, required=False)
+            string_null_with_default = serializers.CharField(allow_null=True, default="default")
 
             # Email and URL fields with allow_null
             email_allow_null = serializers.EmailField(allow_null=True)
@@ -968,31 +942,17 @@ class TestSchemaRequiredFields(unittest.TestCase):
         self.assertEqual(schema["properties"]["bool_no_null"]["type"], "boolean")
 
         # Test allow_null fields have array types with null
-        self.assertEqual(
-            schema["properties"]["string_allow_null"]["type"], ["string", "null"]
-        )
-        self.assertEqual(
-            schema["properties"]["int_allow_null"]["type"], ["integer", "null"]
-        )
-        self.assertEqual(
-            schema["properties"]["bool_allow_null"]["type"], ["boolean", "null"]
-        )
+        self.assertEqual(schema["properties"]["string_allow_null"]["type"], ["string", "null"])
+        self.assertEqual(schema["properties"]["int_allow_null"]["type"], ["integer", "null"])
+        self.assertEqual(schema["properties"]["bool_allow_null"]["type"], ["boolean", "null"])
 
         # Test combined options still work
-        self.assertEqual(
-            schema["properties"]["string_null_optional"]["type"], ["string", "null"]
-        )
-        self.assertEqual(
-            schema["properties"]["string_null_with_default"]["type"], ["string", "null"]
-        )
+        self.assertEqual(schema["properties"]["string_null_optional"]["type"], ["string", "null"])
+        self.assertEqual(schema["properties"]["string_null_with_default"]["type"], ["string", "null"])
 
         # Test special field types with allow_null
-        self.assertEqual(
-            schema["properties"]["email_allow_null"]["type"], ["string", "null"]
-        )
-        self.assertEqual(
-            schema["properties"]["url_allow_null"]["type"], ["string", "null"]
-        )
+        self.assertEqual(schema["properties"]["email_allow_null"]["type"], ["string", "null"])
+        self.assertEqual(schema["properties"]["url_allow_null"]["type"], ["string", "null"])
 
         # Format should still be preserved for special fields
         self.assertEqual(schema["properties"]["email_allow_null"]["format"], "email")
@@ -1022,14 +982,10 @@ class TestSchemaRequiredFields(unittest.TestCase):
         self.assertEqual(schema["properties"]["with_null"]["type"], ["integer", "null"])
 
         # with_blank_and_null (CharField with both) should allow null
-        self.assertEqual(
-            schema["properties"]["with_blank_and_null"]["type"], ["string", "null"]
-        )
+        self.assertEqual(schema["properties"]["with_blank_and_null"]["type"], ["string", "null"])
 
         # unique field with blank and null should also allow null
-        self.assertEqual(
-            schema["properties"]["unique_with_blank_null"]["type"], ["string", "null"]
-        )
+        self.assertEqual(schema["properties"]["unique_with_blank_null"]["type"], ["string", "null"])
 
     def test_allow_blank_fields(self):
         """Test that allow_blank fields are properly represented with minLength."""
@@ -1047,20 +1003,12 @@ class TestSchemaRequiredFields(unittest.TestCase):
 
             # Fields with explicit min_length (should preserve that, not add minLength: 1)
             string_min_length_3 = serializers.CharField(min_length=3, allow_blank=False)
-            string_min_length_0_no_blank = serializers.CharField(
-                min_length=0, allow_blank=False
-            )
+            string_min_length_0_no_blank = serializers.CharField(min_length=0, allow_blank=False)
 
             # Combined with other options
-            string_blank_optional = serializers.CharField(
-                allow_blank=True, required=False
-            )
-            string_blank_with_null = serializers.CharField(
-                allow_blank=True, allow_null=True
-            )
-            string_no_blank_with_null = serializers.CharField(
-                allow_blank=False, allow_null=True
-            )
+            string_blank_optional = serializers.CharField(allow_blank=True, required=False)
+            string_blank_with_null = serializers.CharField(allow_blank=True, allow_null=True)
+            string_no_blank_with_null = serializers.CharField(allow_blank=False, allow_null=True)
 
         serializer = BlankTestSerializer()
         schema = get_serializer_schema(serializer)
@@ -1078,16 +1026,12 @@ class TestSchemaRequiredFields(unittest.TestCase):
         # Test explicit min_length is preserved, not overridden
         self.assertEqual(schema["properties"]["string_min_length_3"]["minLength"], 3)
         # min_length=0 with allow_blank=False should become minLength: 1
-        self.assertEqual(
-            schema["properties"]["string_min_length_0_no_blank"]["minLength"], 1
-        )
+        self.assertEqual(schema["properties"]["string_min_length_0_no_blank"]["minLength"], 1)
 
         # Test combined options
         self.assertNotIn("minLength", schema["properties"]["string_blank_optional"])
         self.assertNotIn("minLength", schema["properties"]["string_blank_with_null"])
-        self.assertEqual(
-            schema["properties"]["string_no_blank_with_null"]["minLength"], 1
-        )
+        self.assertEqual(schema["properties"]["string_no_blank_with_null"]["minLength"], 1)
         self.assertEqual(
             schema["properties"]["string_no_blank_with_null"]["type"],
             ["string", "null"],
@@ -1117,9 +1061,7 @@ class TestSchemaRequiredFields(unittest.TestCase):
 
         # with_blank_and_null should allow both blank and null
         self.assertNotIn("minLength", schema["properties"]["with_blank_and_null"])
-        self.assertEqual(
-            schema["properties"]["with_blank_and_null"]["type"], ["string", "null"]
-        )
+        self.assertEqual(schema["properties"]["with_blank_and_null"]["type"], ["string", "null"])
 
 
 class TestListSerializerSchemaGeneration(unittest.TestCase):
@@ -1556,9 +1498,7 @@ class TestRelationshipFieldSchemas(unittest.TestCase):
         """Test PrimaryKeyRelatedField with allow_null=True."""
         from .models import Customer
 
-        field = serializers.PrimaryKeyRelatedField(
-            queryset=Customer.objects.all(), allow_null=True
-        )
+        field = serializers.PrimaryKeyRelatedField(queryset=Customer.objects.all(), allow_null=True)
         schema = field_to_json_schema(field)
 
         # Should handle nullable
@@ -1571,9 +1511,7 @@ class TestRelationshipFieldSchemas(unittest.TestCase):
         from .models import Customer
 
         # When many=True, DRF wraps it in ManyRelatedField
-        field = serializers.PrimaryKeyRelatedField(
-            queryset=Customer.objects.all(), many=True
-        )
+        field = serializers.PrimaryKeyRelatedField(queryset=Customer.objects.all(), many=True)
         schema = field_to_json_schema(field)
 
         # Should be array of integers
@@ -1585,9 +1523,7 @@ class TestRelationshipFieldSchemas(unittest.TestCase):
         """Test SlugRelatedField schema generation."""
         from .models import Category
 
-        field = serializers.SlugRelatedField(
-            queryset=Category.objects.all(), slug_field="slug"
-        )
+        field = serializers.SlugRelatedField(queryset=Category.objects.all(), slug_field="slug")
         schema = field_to_json_schema(field)
 
         # Should be string type for slug
@@ -1600,9 +1536,7 @@ class TestRelationshipFieldSchemas(unittest.TestCase):
         """Test SlugRelatedField with allow_null=True."""
         from .models import Category
 
-        field = serializers.SlugRelatedField(
-            queryset=Category.objects.all(), slug_field="slug", allow_null=True
-        )
+        field = serializers.SlugRelatedField(queryset=Category.objects.all(), slug_field="slug", allow_null=True)
         schema = field_to_json_schema(field)
 
         # Should handle nullable
@@ -1612,9 +1546,7 @@ class TestRelationshipFieldSchemas(unittest.TestCase):
         """Test SlugRelatedField with many=True."""
         from .models import Category
 
-        field = serializers.SlugRelatedField(
-            queryset=Category.objects.all(), slug_field="slug", many=True
-        )
+        field = serializers.SlugRelatedField(queryset=Category.objects.all(), slug_field="slug", many=True)
         schema = field_to_json_schema(field)
 
         # Should be array of strings
@@ -1626,9 +1558,7 @@ class TestRelationshipFieldSchemas(unittest.TestCase):
         """Test HyperlinkedRelatedField schema generation."""
         from .models import Customer
 
-        field = serializers.HyperlinkedRelatedField(
-            queryset=Customer.objects.all(), view_name="customer-detail"
-        )
+        field = serializers.HyperlinkedRelatedField(queryset=Customer.objects.all(), view_name="customer-detail")
         schema = field_to_json_schema(field)
 
         # Should be string with URI format
@@ -1656,9 +1586,7 @@ class TestRelationshipFieldSchemas(unittest.TestCase):
 
         # Create a PrimaryKeyRelatedField with many=True
         # DRF internally creates ManyRelatedField(child=PrimaryKeyRelatedField())
-        field = serializers.PrimaryKeyRelatedField(
-            queryset=Customer.objects.all(), many=True
-        )
+        field = serializers.PrimaryKeyRelatedField(queryset=Customer.objects.all(), many=True)
         schema = field_to_json_schema(field)
 
         # Should wrap child schema in array
@@ -1683,9 +1611,7 @@ class TestRelationshipFieldSchemas(unittest.TestCase):
         self.assertEqual(description, "Primary key (id) of customer object")
 
         # Test SlugRelatedField includes actual slug field name in new format
-        slug_field = serializers.SlugRelatedField(
-            queryset=Category.objects.all(), slug_field="slug"
-        )
+        slug_field = serializers.SlugRelatedField(queryset=Category.objects.all(), slug_field="slug")
         slug_schema = field_to_json_schema(slug_field)
         self.assertIn("description", slug_schema)
         slug_description = slug_schema["description"]
@@ -1696,9 +1622,7 @@ class TestRelationshipFieldSchemas(unittest.TestCase):
         self.assertEqual(slug_description, "slug field of related category object")
 
         # Test SlugRelatedField with custom field name
-        custom_slug_field = serializers.SlugRelatedField(
-            queryset=Category.objects.all(), slug_field="name"
-        )
+        custom_slug_field = serializers.SlugRelatedField(queryset=Category.objects.all(), slug_field="name")
         custom_schema = field_to_json_schema(custom_slug_field)
         custom_description = custom_schema["description"]
         self.assertIn("name", custom_description.lower())  # Should mention custom field
@@ -1716,9 +1640,7 @@ class TestRelationshipFieldsInSerializers(unittest.TestCase):
 
         class OrderSerializer(serializers.Serializer):
             id = serializers.IntegerField(read_only=True)
-            customer = serializers.PrimaryKeyRelatedField(
-                queryset=Customer.objects.all()
-            )
+            customer = serializers.PrimaryKeyRelatedField(queryset=Customer.objects.all())
             total = serializers.DecimalField(max_digits=10, decimal_places=2)
 
         schema = get_serializer_schema(OrderSerializer())
@@ -1735,9 +1657,7 @@ class TestRelationshipFieldsInSerializers(unittest.TestCase):
 
         class TagSerializer(serializers.Serializer):
             name = serializers.CharField(max_length=50)
-            products = serializers.PrimaryKeyRelatedField(
-                queryset=Product.objects.all(), many=True, required=False
-            )
+            products = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), many=True, required=False)
 
         schema = get_serializer_schema(TagSerializer())
 
@@ -1767,9 +1687,7 @@ class TestRelationshipFieldsInSerializers(unittest.TestCase):
 
         # Should include category_slug as string array with null (since allow_null=True)
         self.assertIn("category_slug", schema["properties"])
-        self.assertEqual(
-            schema["properties"]["category_slug"]["type"], ["string", "null"]
-        )
+        self.assertEqual(schema["properties"]["category_slug"]["type"], ["string", "null"])
 
     def test_serializer_with_hyperlinked_relationship(self):
         """Test serializer using HyperlinkedRelatedField."""
@@ -1841,9 +1759,7 @@ class TestListFieldSchemas(unittest.TestCase):
 
     def test_list_field_with_min_max_length(self):
         """Test ListField with min_length and max_length constraints."""
-        field = serializers.ListField(
-            child=serializers.CharField(), min_length=2, max_length=5
-        )
+        field = serializers.ListField(child=serializers.CharField(), min_length=2, max_length=5)
         schema = field_to_json_schema(field)
         self.assertEqual(schema["type"], "array")
         self.assertEqual(schema["minItems"], 2)
@@ -1858,9 +1774,7 @@ class TestListFieldSchemas(unittest.TestCase):
 
     def test_nested_list_field(self):
         """Test nested ListField (array of arrays)."""
-        field = serializers.ListField(
-            child=serializers.ListField(child=serializers.CharField())
-        )
+        field = serializers.ListField(child=serializers.ListField(child=serializers.CharField()))
         schema = field_to_json_schema(field)
         self.assertEqual(schema["type"], "array")
         self.assertEqual(schema["items"]["type"], "array")
@@ -1868,9 +1782,7 @@ class TestListFieldSchemas(unittest.TestCase):
 
     def test_list_field_with_complex_child(self):
         """Test ListField with child field that has constraints."""
-        field = serializers.ListField(
-            child=serializers.CharField(max_length=10, min_length=2)
-        )
+        field = serializers.ListField(child=serializers.CharField(max_length=10, min_length=2))
         schema = field_to_json_schema(field)
         self.assertEqual(schema["type"], "array")
         self.assertEqual(schema["items"]["type"], "string")
@@ -1904,9 +1816,7 @@ class TestDictFieldSchemas(unittest.TestCase):
 
     def test_dict_field_with_complex_child(self):
         """Test DictField with child field that has constraints."""
-        field = serializers.DictField(
-            child=serializers.IntegerField(min_value=0, max_value=100)
-        )
+        field = serializers.DictField(child=serializers.IntegerField(min_value=0, max_value=100))
         schema = field_to_json_schema(field)
         self.assertEqual(schema["type"], "object")
         self.assertEqual(schema["additionalProperties"]["type"], "integer")
@@ -1935,9 +1845,7 @@ class TestJSONFieldSchemas(unittest.TestCase):
             schema,
             [
                 {},  # Empty schema (most permissive)
-                {
-                    "type": ["object", "array", "string", "number", "boolean", "null"]
-                },  # All JSON types
+                {"type": ["object", "array", "string", "number", "boolean", "null"]},  # All JSON types
             ],
         )
 
@@ -1950,9 +1858,7 @@ class TestJSONFieldSchemas(unittest.TestCase):
             schema,
             [
                 {},  # Empty schema (most permissive)
-                {
-                    "type": ["object", "array", "string", "number", "boolean", "null"]
-                },  # All JSON types
+                {"type": ["object", "array", "string", "number", "boolean", "null"]},  # All JSON types
             ],
         )
 
@@ -1993,12 +1899,8 @@ class TestDurationFieldSchemas(unittest.TestCase):
         # Min/max values should be converted to ISO 8601 format
         self.assertIn("minimum", schema)
         self.assertIn("maximum", schema)
-        self.assertEqual(
-            schema["minimum"], "P0DT01H00M00S"
-        )  # 1 hour in Django's ISO format
-        self.assertEqual(
-            schema["maximum"], "P7DT00H00M00S"
-        )  # 7 days in Django's ISO format
+        self.assertEqual(schema["minimum"], "P0DT01H00M00S")  # 1 hour in Django's ISO format
+        self.assertEqual(schema["maximum"], "P7DT00H00M00S")  # 7 days in Django's ISO format
 
     def test_duration_field_with_help_text(self):
         """Test DurationField with custom help text."""
@@ -2105,9 +2007,7 @@ class TestChoiceFieldSchemas(unittest.TestCase):
 
     def test_choice_field_with_allow_blank(self):
         """Test ChoiceField with allow_blank=True."""
-        field = serializers.ChoiceField(
-            choices=["draft", "published"], allow_blank=True
-        )
+        field = serializers.ChoiceField(choices=["draft", "published"], allow_blank=True)
         schema = field_to_json_schema(field)
 
         self.assertEqual(schema["type"], "string")
@@ -2140,9 +2040,7 @@ class TestChoiceFieldSchemas(unittest.TestCase):
 
     def test_multiple_choice_field_with_allow_empty_false(self):
         """Test MultipleChoiceField with allow_empty=False."""
-        field = serializers.MultipleChoiceField(
-            choices=["tag1", "tag2", "tag3"], allow_empty=False
-        )
+        field = serializers.MultipleChoiceField(choices=["tag1", "tag2", "tag3"], allow_empty=False)
         schema = field_to_json_schema(field)
 
         self.assertEqual(schema["type"], "array")
@@ -2178,15 +2076,11 @@ class TestChoiceFieldSchemas(unittest.TestCase):
         self.assertEqual(schema["type"], "array")
         self.assertEqual(schema["items"]["type"], "string")
         # Should flatten grouped choices
-        self.assertEqual(
-            set(schema["items"]["enum"]), {"python", "javascript", "django", "react"}
-        )
+        self.assertEqual(set(schema["items"]["enum"]), {"python", "javascript", "django", "react"})
 
     def test_multiple_choice_field_with_help_text(self):
         """Test MultipleChoiceField with help_text."""
-        field = serializers.MultipleChoiceField(
-            choices=["tag1", "tag2", "tag3"], help_text="Select multiple tags"
-        )
+        field = serializers.MultipleChoiceField(choices=["tag1", "tag2", "tag3"], help_text="Select multiple tags")
         schema = field_to_json_schema(field)
 
         self.assertIn("description", schema)
@@ -2226,9 +2120,7 @@ class TestGenerateFilterSchema(unittest.TestCase):
         class ProductFilter(django_filters.FilterSet):
             name = django_filters.CharFilter(lookup_expr="icontains")
             in_stock = django_filters.BooleanFilter()
-            min_price = django_filters.NumberFilter(
-                field_name="price", lookup_expr="gte"
-            )
+            min_price = django_filters.NumberFilter(field_name="price", lookup_expr="gte")
             category = django_filters.UUIDFilter()
 
             class Meta:
@@ -2240,9 +2132,7 @@ class TestGenerateFilterSchema(unittest.TestCase):
             serializer_class = serializers.Serializer
             filterset_class = ProductFilter
 
-        tool = MCPTool(
-            name="list_products", viewset_class=FilteredViewSet, action="list"
-        )
+        tool = MCPTool(name="list_products", viewset_class=FilteredViewSet, action="list")
         schema = generate_tool_schema(tool)
 
         input_schema = schema["inputSchema"]
@@ -2277,9 +2167,7 @@ class TestGenerateFilterSchema(unittest.TestCase):
             serializer_class = serializers.Serializer
             filterset_fields = ["name", "in_stock", "price"]
 
-        tool = MCPTool(
-            name="list_products", viewset_class=SimpleFilteredViewSet, action="list"
-        )
+        tool = MCPTool(name="list_products", viewset_class=SimpleFilteredViewSet, action="list")
         schema = generate_tool_schema(tool)
 
         input_schema = schema["inputSchema"]
@@ -2304,9 +2192,7 @@ class TestGenerateFilterSchema(unittest.TestCase):
             search_fields = ["name", "description"]
             ordering_fields = ["name", "price"]
 
-        tool = MCPTool(
-            name="list_products", viewset_class=SearchableViewSet, action="list"
-        )
+        tool = MCPTool(name="list_products", viewset_class=SearchableViewSet, action="list")
         schema = generate_tool_schema(tool)
 
         body = schema["inputSchema"]["properties"]["body"]
@@ -2324,9 +2210,7 @@ class TestGenerateFilterSchema(unittest.TestCase):
             serializer_class = serializers.Serializer
             filterset_fields = ["name", "in_stock"]
 
-        tool = MCPTool(
-            name="create_product", viewset_class=FilteredViewSet, action="create"
-        )
+        tool = MCPTool(name="create_product", viewset_class=FilteredViewSet, action="create")
         schema = generate_tool_schema(tool)
 
         # Create action should use serializer, not filters

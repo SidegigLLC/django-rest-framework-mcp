@@ -24,9 +24,7 @@ class JsonRpcProtocolComplianceTests(TestCase):
         # Test initialize
         request_data = {"jsonrpc": "2.0", "method": "initialize", "params": {}, "id": 1}
 
-        response = self.client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = self.client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         data = json.loads(response.content)
 
@@ -47,9 +45,7 @@ class JsonRpcProtocolComplianceTests(TestCase):
             "id": 2,
         }
 
-        response = self.client.post(
-            "/mcp/", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = self.client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
         data = json.loads(response.content)
 
@@ -84,9 +80,7 @@ class JsonRpcProtocolComplianceTests(TestCase):
             mock_response.status_code = 200
             mock_viewset_instance.list = Mock(return_value=mock_response)
 
-            mock_tool = MCPTool(
-                name="test_tool", viewset_class=mock_viewset_class, action="list"
-            )
+            mock_tool = MCPTool(name="test_tool", viewset_class=mock_viewset_class, action="list")
             mock_get_tool.return_value = mock_tool
 
             request_data = {
@@ -96,9 +90,7 @@ class JsonRpcProtocolComplianceTests(TestCase):
                 "id": 3,
             }
 
-            response = self.client.post(
-                "/mcp/", data=json.dumps(request_data), content_type="application/json"
-            )
+            response = self.client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
             data = json.loads(response.content)
 
@@ -169,9 +161,7 @@ class JsonRpcProtocolComplianceTests(TestCase):
 
     def test_json_rpc_parse_error_format(self):
         """Test that JSON-RPC parse errors conform to 2.0 specification."""
-        response = self.client.post(
-            "/mcp/", data="invalid json", content_type="application/json"
-        )
+        response = self.client.post("/mcp/", data="invalid json", content_type="application/json")
 
         data = json.loads(response.content)
 
@@ -196,9 +186,7 @@ class JsonRpcProtocolComplianceTests(TestCase):
                 "id": 5,
             }
 
-            response = self.client.post(
-                "/mcp/", data=json.dumps(request_data), content_type="application/json"
-            )
+            response = self.client.post("/mcp/", data=json.dumps(request_data), content_type="application/json")
 
             data = json.loads(response.content)
 

@@ -80,9 +80,7 @@ class MCPSettingsTests(TestCase):
 
     def test_user_settings_property(self):
         """Test the user_settings property."""
-        with override_settings(
-            DJANGORESTFRAMEWORK_MCP={"BYPASS_VIEWSET_AUTHENTICATION": True}
-        ):
+        with override_settings(DJANGORESTFRAMEWORK_MCP={"BYPASS_VIEWSET_AUTHENTICATION": True}):
             settings_obj = MCPSettings()
             user_settings = settings_obj.user_settings
             self.assertEqual(user_settings, {"BYPASS_VIEWSET_AUTHENTICATION": True})
@@ -167,11 +165,7 @@ class SettingsReloadTests(TestCase):
             sync_receivers = receivers[0]
         else:
             sync_receivers = receivers
-        reload_functions = [
-            receiver
-            for receiver in sync_receivers
-            if receiver.__name__ == "reload_mcp_settings"
-        ]
+        reload_functions = [receiver for receiver in sync_receivers if receiver.__name__ == "reload_mcp_settings"]
         self.assertTrue(len(reload_functions) > 0)
 
     def test_settings_reload_on_signal(self):
@@ -181,9 +175,7 @@ class SettingsReloadTests(TestCase):
         self.assertFalse(original_value)  # Default value
 
         # Now apply override and manually reload to simulate signal behavior
-        with override_settings(
-            DJANGORESTFRAMEWORK_MCP={"BYPASS_VIEWSET_AUTHENTICATION": True}
-        ):
+        with override_settings(DJANGORESTFRAMEWORK_MCP={"BYPASS_VIEWSET_AUTHENTICATION": True}):
             mcp_settings.reload()
             # Now it should pick up the overridden value
             self.assertTrue(mcp_settings.BYPASS_VIEWSET_AUTHENTICATION)

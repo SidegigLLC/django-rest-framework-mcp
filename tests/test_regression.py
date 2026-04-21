@@ -19,12 +19,8 @@ class DRFRegressionTests(TestCase):
         self.client = Client()
 
         # Create test customers
-        self.customer1 = CustomerFactory(
-            name="Alice Johnson", email="alice@example.com", age=30, is_active=True
-        )
-        self.customer2 = CustomerFactory(
-            name="Bob Smith", email="bob@example.com", age=25, is_active=False
-        )
+        self.customer1 = CustomerFactory(name="Alice Johnson", email="alice@example.com", age=30, is_active=True)
+        self.customer2 = CustomerFactory(name="Bob Smith", email="bob@example.com", age=25, is_active=False)
 
         # Create test products
         self.product1 = ProductFactory(
@@ -98,9 +94,7 @@ class DRFRegressionTests(TestCase):
             "is_active": True,
         }
 
-        response = self.client.post(
-            url, data=json.dumps(data), content_type="application/json"
-        )
+        response = self.client.post(url, data=json.dumps(data), content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -121,9 +115,7 @@ class DRFRegressionTests(TestCase):
             "age": -5,  # Invalid age
         }
 
-        response = self.client.post(
-            url, data=json.dumps(data), content_type="application/json"
-        )
+        response = self.client.post(url, data=json.dumps(data), content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -141,9 +133,7 @@ class DRFRegressionTests(TestCase):
             "is_active": False,
         }
 
-        response = self.client.put(
-            url, data=json.dumps(data), content_type="application/json"
-        )
+        response = self.client.put(url, data=json.dumps(data), content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -161,21 +151,15 @@ class DRFRegressionTests(TestCase):
             "age": 32  # Only update age
         }
 
-        response = self.client.patch(
-            url, data=json.dumps(data), content_type="application/json"
-        )
+        response = self.client.patch(url, data=json.dumps(data), content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Verify partial update in database
         self.customer1.refresh_from_db()
         self.assertEqual(self.customer1.age, 32)
-        self.assertEqual(
-            self.customer1.name, "Alice Johnson"
-        )  # Should remain unchanged
-        self.assertEqual(
-            self.customer1.email, "alice@example.com"
-        )  # Should remain unchanged
+        self.assertEqual(self.customer1.name, "Alice Johnson")  # Should remain unchanged
+        self.assertEqual(self.customer1.email, "alice@example.com")  # Should remain unchanged
 
     def test_customer_delete_api(self):
         """Test DELETE /api/customers/{id}/ deletes customer."""
@@ -240,9 +224,7 @@ class DRFRegressionTests(TestCase):
             "in_stock": True,
         }
 
-        response = self.client.post(
-            url, data=json.dumps(data), content_type="application/json"
-        )
+        response = self.client.post(url, data=json.dumps(data), content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -264,9 +246,7 @@ class DRFRegressionTests(TestCase):
             "in_stock": False,
         }
 
-        response = self.client.put(
-            url, data=json.dumps(data), content_type="application/json"
-        )
+        response = self.client.put(url, data=json.dumps(data), content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -302,9 +282,7 @@ class DRFRegressionTests(TestCase):
         url = "/api/customers/"
         data = {"name": "JSON Test User", "email": "json@example.com", "age": 28}
 
-        response = self.client.post(
-            url, data=json.dumps(data), content_type="application/json"
-        )
+        response = self.client.post(url, data=json.dumps(data), content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response_data = response.json()
@@ -360,15 +338,11 @@ class DRFRegressionTests(TestCase):
             "age": 25,
             "is_active": True,
         }
-        response = self.client.put(
-            url, data=json.dumps(data), content_type="application/json"
-        )
+        response = self.client.put(url, data=json.dumps(data), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # PATCH should work
-        response = self.client.patch(
-            url, data=json.dumps({"age": 26}), content_type="application/json"
-        )
+        response = self.client.patch(url, data=json.dumps({"age": 26}), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # DELETE should work
@@ -382,9 +356,7 @@ class AuthenticationRegressionTests(TestCase):
 
     def setUp(self):
         """Set up test data."""
-        self.user = UserFactory(
-            username="apiuser", email="api@example.com", password="apipass"
-        )
+        self.user = UserFactory(username="apiuser", email="api@example.com", password="apipass")
         self.token = TokenFactory(user=self.user)
 
         # Create a staff user for permission tests
@@ -423,9 +395,7 @@ class AuthenticationRegressionTests(TestCase):
 
     def test_authenticated_viewset_normal_api_with_invalid_token(self):
         """Test that authenticated ViewSets reject invalid tokens via API."""
-        response = self.client.get(
-            "/api/auth/authenticated/", HTTP_AUTHORIZATION="Token invalid-token-123"
-        )
+        response = self.client.get("/api/auth/authenticated/", HTTP_AUTHORIZATION="Token invalid-token-123")
 
         # Should return 401 Unauthorized
         self.assertEqual(response.status_code, 401)
@@ -445,9 +415,7 @@ class AuthenticationRegressionTests(TestCase):
 
     def test_multiple_auth_viewset_token_auth_via_api(self):
         """Test ViewSet with multiple auth classes works with token via API."""
-        response = self.client.get(
-            "/api/auth/multipleauth/", HTTP_AUTHORIZATION=f"Token {self.token.key}"
-        )
+        response = self.client.get("/api/auth/multipleauth/", HTTP_AUTHORIZATION=f"Token {self.token.key}")
 
         # Should succeed
         self.assertEqual(response.status_code, 200)
@@ -457,9 +425,7 @@ class AuthenticationRegressionTests(TestCase):
     def test_multiple_auth_viewset_basic_auth_via_api(self):
         """Test ViewSet with multiple auth classes works with basic auth via API."""
         credentials = base64.b64encode(b"apiuser:apipass").decode("ascii")
-        response = self.client.get(
-            "/api/auth/multipleauth/", HTTP_AUTHORIZATION=f"Basic {credentials}"
-        )
+        response = self.client.get("/api/auth/multipleauth/", HTTP_AUTHORIZATION=f"Basic {credentials}")
 
         # Should succeed
         self.assertEqual(response.status_code, 200)
@@ -510,9 +476,7 @@ class BypassAuthenticationRegressionTests(TestCase):
         self.assertIn("WWW-Authenticate", response)
 
         # But should work with proper token
-        response = self.client.get(
-            "/api/auth/authenticated/", HTTP_AUTHORIZATION=f"Token {self.token.key}"
-        )
+        response = self.client.get("/api/auth/authenticated/", HTTP_AUTHORIZATION=f"Token {self.token.key}")
         self.assertEqual(response.status_code, 200)
 
     def test_bypass_setting_isolation_from_regular_drf_behavior(self):
@@ -544,17 +508,13 @@ class BypassPermissionsRegressionTests(TestCase):
     """Test that bypassing MCP permissions doesn't affect normal API permissions."""
 
     def setUp(self):
-        self.user = UserFactory(
-            username="permuser", email="perm@example.com", password="permpass"
-        )
+        self.user = UserFactory(username="permuser", email="perm@example.com", password="permpass")
         self.token = TokenFactory(user=self.user)
 
     def test_bypass_permissions_setting_doesnt_affect_normal_api(self):
         """Test that BYPASS_VIEWSET_PERMISSIONS setting only affects MCP, not normal API."""
         # Even with permissions bypass, normal API should still check permissions
-        response = self.client.get(
-            "/api/auth/authenticated/", HTTP_AUTHORIZATION=f"Token {self.token.key}"
-        )
+        response = self.client.get("/api/auth/authenticated/", HTTP_AUTHORIZATION=f"Token {self.token.key}")
 
         # Should succeed (user is authenticated)
         self.assertEqual(response.status_code, 200)
@@ -566,9 +526,7 @@ class BypassPermissionsRegressionTests(TestCase):
     def test_bypass_permissions_isolation(self):
         """Test that permission bypass is isolated to MCP requests only."""
         # Test custom permission ViewSet via normal API
-        response = self.client.get(
-            "/api/auth/custompermission/", HTTP_AUTHORIZATION=f"Token {self.token.key}"
-        )
+        response = self.client.get("/api/auth/custompermission/", HTTP_AUTHORIZATION=f"Token {self.token.key}")
 
         # Should still be denied by normal API (permissions not actually bypassed)
         self.assertEqual(response.status_code, 403)
@@ -602,15 +560,11 @@ class AuthenticationMiddlewareCompatibilityTests(TestCase):
         # Normal API should work with session
         response = self.client.get("/api/auth/multipleauth/")
         # May work or may fail depending on CSRF, but shouldn't crash
-        self.assertIn(
-            response.status_code, [200, 403]
-        )  # Either success or CSRF failure
+        self.assertIn(response.status_code, [200, 403])  # Either success or CSRF failure
 
     def test_auth_middleware_doesnt_interfere_with_token_auth(self):
         """Test that auth middleware doesn't interfere with token authentication."""
-        response = self.client.get(
-            "/api/auth/authenticated/", HTTP_AUTHORIZATION=f"Token {self.token.key}"
-        )
+        response = self.client.get("/api/auth/authenticated/", HTTP_AUTHORIZATION=f"Token {self.token.key}")
 
         # Should work normally
         self.assertEqual(response.status_code, 200)
@@ -624,9 +578,7 @@ class AuthenticationMiddlewareCompatibilityTests(TestCase):
         mcp_client.defaults["HTTP_AUTHORIZATION"] = f"Token {self.token.key}"
 
         # Both should work independently
-        api_response = self.client.get(
-            "/api/auth/authenticated/", HTTP_AUTHORIZATION=f"Token {self.token.key}"
-        )
+        api_response = self.client.get("/api/auth/authenticated/", HTTP_AUTHORIZATION=f"Token {self.token.key}")
         self.assertEqual(api_response.status_code, 200)
 
         # MCP should also work

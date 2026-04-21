@@ -27,7 +27,7 @@ class MCPRegistry:
             base_name = viewset_class.__name__.replace("ViewSet", "").lower()
             try:
                 base_name = viewset_class.queryset.model._meta.object_name.lower() + "s"  # type: ignore[union-attr]
-            except (AttributeError, TypeError):
+            except AttributeError, TypeError:
                 pass
 
         # Check for exact same ViewSet class registration (by object identity, not just class name)
@@ -57,16 +57,8 @@ class MCPRegistry:
 
             # Use custom values if provided, otherwise generate defaults
             tool_name = custom_name if custom_name else f"{action_name}_{base_name}"
-            title = (
-                custom_title
-                if custom_title
-                else self._generate_tool_title(action_name, base_name)
-            )
-            description = (
-                custom_description
-                if custom_description
-                else f"{action_name.capitalize()} {base_name}"
-            )
+            title = custom_title if custom_title else self._generate_tool_title(action_name, base_name)
+            description = custom_description if custom_description else f"{action_name.capitalize()} {base_name}"
 
             # Create the MCPTool object
             tool = MCPTool(
@@ -108,9 +100,7 @@ class MCPRegistry:
         """Get all registered MCP tools."""
         return list(self._tools.values())
 
-    def _get_registerable_actions(
-        self, viewset_class: Type[GenericViewSet]
-    ) -> List[str]:
+    def _get_registerable_actions(self, viewset_class: Type[GenericViewSet]) -> List[str]:
         """
         Get actions that should be registered as MCP tools.
 
