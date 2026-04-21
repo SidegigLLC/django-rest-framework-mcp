@@ -23,7 +23,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          fetch-depth: 1
+          # Full history so `git merge-base origin/main HEAD` works in the review prompt.
+          fetch-depth: 0
 
       - name: Review PR
         uses: anthropics/claude-code-action@v1
