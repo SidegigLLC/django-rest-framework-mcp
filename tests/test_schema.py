@@ -2226,7 +2226,9 @@ class TestGenerateFilterSchema(unittest.TestCase):
         class ProductFilter(django_filters.FilterSet):
             name = django_filters.CharFilter(lookup_expr="icontains")
             in_stock = django_filters.BooleanFilter()
-            min_price = django_filters.NumberFilter(field_name="price", lookup_expr="gte")
+            min_price = django_filters.NumberFilter(
+                field_name="price", lookup_expr="gte"
+            )
             category = django_filters.UUIDFilter()
 
             class Meta:
@@ -2238,7 +2240,9 @@ class TestGenerateFilterSchema(unittest.TestCase):
             serializer_class = serializers.Serializer
             filterset_class = ProductFilter
 
-        tool = MCPTool(name="list_products", viewset_class=FilteredViewSet, action="list")
+        tool = MCPTool(
+            name="list_products", viewset_class=FilteredViewSet, action="list"
+        )
         schema = generate_tool_schema(tool)
 
         input_schema = schema["inputSchema"]
@@ -2273,7 +2277,9 @@ class TestGenerateFilterSchema(unittest.TestCase):
             serializer_class = serializers.Serializer
             filterset_fields = ["name", "in_stock", "price"]
 
-        tool = MCPTool(name="list_products", viewset_class=SimpleFilteredViewSet, action="list")
+        tool = MCPTool(
+            name="list_products", viewset_class=SimpleFilteredViewSet, action="list"
+        )
         schema = generate_tool_schema(tool)
 
         input_schema = schema["inputSchema"]
@@ -2286,7 +2292,8 @@ class TestGenerateFilterSchema(unittest.TestCase):
 
     def test_list_action_with_search_and_ordering(self):
         """Test that search_fields and ordering_fields are exposed."""
-        from rest_framework.filters import SearchFilter, OrderingFilter
+        from rest_framework.filters import OrderingFilter, SearchFilter
+
         from tests.models import Product
 
         class SearchableViewSet(ModelViewSet):
@@ -2297,7 +2304,9 @@ class TestGenerateFilterSchema(unittest.TestCase):
             search_fields = ["name", "description"]
             ordering_fields = ["name", "price"]
 
-        tool = MCPTool(name="list_products", viewset_class=SearchableViewSet, action="list")
+        tool = MCPTool(
+            name="list_products", viewset_class=SearchableViewSet, action="list"
+        )
         schema = generate_tool_schema(tool)
 
         body = schema["inputSchema"]["properties"]["body"]
@@ -2315,7 +2324,9 @@ class TestGenerateFilterSchema(unittest.TestCase):
             serializer_class = serializers.Serializer
             filterset_fields = ["name", "in_stock"]
 
-        tool = MCPTool(name="create_product", viewset_class=FilteredViewSet, action="create")
+        tool = MCPTool(
+            name="create_product", viewset_class=FilteredViewSet, action="create"
+        )
         schema = generate_tool_schema(tool)
 
         # Create action should use serializer, not filters

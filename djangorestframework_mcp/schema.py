@@ -572,7 +572,7 @@ def generate_filter_schema(tool: MCPTool) -> Dict[str, Any]:
     # Extract search fields from SearchFilter backend
     filter_backends = getattr(viewset_class, "filter_backends", [])
     try:
-        from rest_framework.filters import SearchFilter, OrderingFilter
+        from rest_framework.filters import OrderingFilter, SearchFilter
 
         if any(issubclass(b, SearchFilter) for b in filter_backends):
             search_fields = getattr(viewset_class, "search_fields", [])
@@ -614,11 +614,11 @@ def _filter_field_to_schema(field_name: str, field: Any) -> Dict[str, Any]:
 
     try:
         from django_filters import (
+            BaseInFilter,
             BooleanFilter,
+            ChoiceFilter,
             NumberFilter,
             UUIDFilter,
-            BaseInFilter,
-            ChoiceFilter,
         )
 
         if isinstance(field, BooleanFilter):
@@ -628,7 +628,10 @@ def _filter_field_to_schema(field_name: str, field: Any) -> Dict[str, Any]:
         elif isinstance(field, UUIDFilter):
             schema = {"type": "string"}
         elif isinstance(field, BaseInFilter):
-            schema = {"type": "string", "description": f"Comma-separated values for {field_name}"}
+            schema = {
+                "type": "string",
+                "description": f"Comma-separated values for {field_name}",
+            }
         elif isinstance(field, ChoiceFilter):
             choices = list(field.extra.get("choices", []))
             if choices:
@@ -640,7 +643,9 @@ def _filter_field_to_schema(field_name: str, field: Any) -> Dict[str, Any]:
 
     # Use label or help_text if available
     label = getattr(field, "label", None)
-    help_text = getattr(field.field, "help_text", None) if hasattr(field, "field") else None
+    help_text = (
+        getattr(field.field, "help_text", None) if hasattr(field, "field") else None
+    )
 
     if label:
         schema["title"] = str(label)
