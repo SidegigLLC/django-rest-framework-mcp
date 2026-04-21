@@ -76,9 +76,16 @@ jobs:
           pip install -e ".[dev]"
           pip install "Django~=${{ matrix.django-version }}.0" django-filter
 
+      - name: Log resolved versions
+        run: |
+          python --version
+          python -c "import django; print('Django', django.get_version())"
+          python -c "import rest_framework; print('DRF', rest_framework.VERSION)"
+          python -c "import django_filters; print('django-filter', django_filters.__version__)"
+
       - name: Run tests with coverage
         run: |
-          python -m coverage run -m pytest
+          python -m coverage run -m pytest -v
           python -m coverage xml
           python -m coverage report
 
