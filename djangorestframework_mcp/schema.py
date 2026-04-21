@@ -1,5 +1,6 @@
 """Schema generation from DRF serializers to MCP tool schemas."""
 
+import logging
 from typing import Any, Dict
 
 from rest_framework import serializers
@@ -7,6 +8,8 @@ from rest_framework.fields import Field
 from rest_framework.utils.field_mapping import ClassLookupDict
 
 from .types import MCPTool
+
+logger = logging.getLogger(__name__)
 
 
 # Schema generator functions - each field type handles all its own logic
@@ -557,8 +560,13 @@ def generate_filter_schema(tool: MCPTool) -> Dict[str, Any]:
                 field_schema = _filter_field_to_schema(field_name, field)
                 if field_schema:
                     properties[field_name] = field_schema
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning(
+                "Failed to introspect filterset_class %s for %s: %s",
+                filterset_class,
+                viewset_class,
+                exc,
+            )
     else:
         # Fall back to filterset_fields if no filterset_class
         filterset_fields = getattr(viewset_class, "filterset_fields", None)
@@ -635,7 +643,7 @@ def _filter_field_to_schema(field_name: str, field: Any) -> Dict[str, Any]:
         elif isinstance(field, ChoiceFilter):
             choices = list(field.extra.get("choices", []))
             if choices:
-                enum_values = [str(c[0]) for c in choices if c[0]]
+                enum_values = [str(c[0]) for c in choices if c[0] is not None]
                 if enum_values:
                     schema["enum"] = enum_values
     except ImportError:
